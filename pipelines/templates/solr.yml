@@ -1,0 +1,77 @@
+---
+parameters:
+  - name: solrVersion
+    type: string
+  - name: subscriptionId
+    type: string
+  - name: resourceGroupName
+    type: string
+  - name: resourceManagerConnection
+    type: string
+  - name: location
+    type: string
+  - name: webAppName
+    type: string
+  - name: skuSize
+    type: string
+  - name: keyVaultName
+    type: string
+  - name: solrPasswordKeyName
+    type: string
+  - name: coreName
+    type: string
+
+steps:
+
+- task: PowerShell@2
+  inputs:
+    filePath: './scripts/solr/Create-Solr-Package.ps1'
+    pwsh: true
+    arguments:
+      -solrVersion $(solrVersion)
+      -configDir ./configuration/solr
+  displayName: Create Solr package
+
+- task: AzureResourceManagerTemplateDeployment@3
+  inputs:
+    deploymentScope: 'Resource Group'
+    azureResourceManagerConnection: '${{ parameters.resourceManagerConnection }}'
+    subscriptionId: ${{ parameters.subscriptionId }}
+    action: 'Create Or Update Resource Group'
+    resourceGroupName: '${{ parameters.resourceGroupName }}'
+    location: ${{ parameters.location }}
+    templateLocation: 'Linked artifact'
+    csmFile: './arm-templates/solr.json'
+    csmParametersFile: './arm-templates/solr.parameters.json'
+    overrideParameters: >
+    -webAppName ${{ parameters.webAppName }}
+    -location ${{ parameters.location }}
+    -sku ${{ parameters.skuSize }}
+    deploymentMode: 'Incremental'
+  displayName: Create Solr webapp
+
+- task: AzureRmWebAppDeployment@4
+  name: SolrSetup
+  inputs:
+    ConnectionType: 'AzureRM'
+    azureSubscription: '${{ parameters.resourceManagerConnection }}'
+    appType: 'webAppLinux'
+    WebAppName: ${{ parameters.webAppName }}
+    packageForLinux: '$(System.DefaultWorkingDirectory)/**/solr_setup_package.zip'
+  displayName: Setup Solr
+
+- task: AzureCLI@2
+  inputs:
+    azureSubscription: '${{ parameters.resourceManagerConnection }}'
+    scriptType: 'pscore'
+    scriptLocation: 'scriptPath'
+    scriptPath: './scripts/solr/Manage-Solr.ps1'
+    arguments: 
+      -keyVaultName ${{ parameters.keyVaultName }}
+      -webAppUrl $(SolrSetup.AppServiceApplicationUrl)
+      -solrPasswordKeyName ${{ parameters.solrPasswordKeyName }}
+      -coreName ${{ parameters.coreName }}
+  displayName: Finish Solr installation
+
+
+

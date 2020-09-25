@@ -1,20 +1,30 @@
-# Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+# Introduction
+This repository contains deployment configs and settings to run CKAN on Azure.
 
-# Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+## Frontend UI
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+The frontend UI is deployed as a custom container based on ckan/ckan base container. We need a custom container to be able to use Azure Postgresql.
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+Dockerfile to build the container can be found at ``frontend-ui/Dockerfile``
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+To make a container locally use
+
+```
+cd frontend-ui
+docker build -t ckan:<<version_number>> .
+```
+
+There is ``docker-compose.yaml`` file which can be used to then start the container along with it's dependencies. CKAN needs access to Solr, Redis and Postgresql to work.
+
+We are using Solr deployed on Azure App Service and Azure Postgresql here. Redis is deployed along side the frontend container and is available as redis within the container(No configs needed)
+
+In ``docker-compose.yaml`` you need to edit the environment variables and provide connection specific information to the front end.
+
+You can bring the stack up using
+
+```
+docker compose build
+docker compose up
+```
+
+CKAN frontend UI is now available on localhost:5000 using port forwarding to the frontend container.
