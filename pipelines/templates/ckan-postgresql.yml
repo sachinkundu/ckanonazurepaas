@@ -1,0 +1,121 @@
+---
+resources:
+  containers:
+  - container: pipeline_runner
+    image: postgres:11
+pool:
+  vmImage: 'ubuntu-18.04'
+container: pipeline_runner
+
+parameters:
+  - name: subscriptionId
+    type: string
+  - name: resourceGroupName
+    type: string
+  - name: azureResourceManagerConnection
+    type: string
+
+  - name: location
+    type: string
+    default: "westeurope"
+  - name: serverName
+    type: string
+  - name: virtualNetworkName
+    type: string
+  - name: subnetName
+    type: string
+  - name: administratorLogin
+    type: string
+    default: "ckanpostgresadmin"
+  - name: administratorLoginPassword
+    type: string
+  - name: ckanLogin
+    type: string
+    default: "ckan"
+  - name: ckanLoginPassword
+    type: string
+  - name: ckanDatabaseName
+    type: string
+  - name: skuTier
+    type: string
+    default: "GeneralPurpose"
+  - name: skuCapacity
+    type: number
+    default: 4
+  - name: skuSizeMB
+    type: number
+    default: 10240
+  - name: backupRetentionDays
+    type: number
+    default: 7
+  - name: geoRedundantBackup
+    type: string
+    default: "Disabled"
+  - name: storageAutoGrow
+    type: string
+    default: "Enabled"
+  - name: infrastructureEncryption
+    type: string
+    default: "Disabled"
+  - name: sslEnforcement
+    type: string
+    default: "Enabled"    
+  - name: keyVaultName
+    type: string
+  - name: version
+    type: string
+    default: "11"
+steps:
+  - task: AzureResourceManagerTemplateDeployment@3
+    displayName: "Create PostgreSQL"
+    inputs:
+      deploymentScope: "Resource Group"
+      azureResourceManagerConnection: ${{ parameters.azureResourceManagerConnection }}
+      subscriptionId: ${{ parameters.subscriptionId }}
+      action: "Create Or Update Resource Group"
+      resourceGroupName: ${{ parameters.resourceGroupName }}
+      location: ${{ parameters.location }}
+      templateLocation: "Linked artifact"
+      csmFile: "./arm-templates/ckan_postgres.json"
+      csmParametersFile: "./arm-templates/ckan_postgres.parameters.json"
+      overrideParameters: >
+        -serverName ${{ parameters.serverName }}
+        -location ${{ parameters.location }}
+        -skuTier ${{ parameters.skuTier }}
+        -skuCapacity ${{ parameters.skuCapacity }}
+        -skuSizeMB ${{ parameters.skuSizeMB }}
+        -backupRetentionDays ${{ parameters.backupRetentionDays }}
+        -geoRedundantBackup ${{ parameters.geoRedundantBackup }}
+        -storageAutoGrow ${{ parameters.storageAutoGrow }}
+        -infrastructureEncryption ${{ parameters.infrastructureEncryption }}
+        -sslEnforcement ${{ parameters.sslEnforcement }}
+        -version ${{ parameters.version }}
+        -administratorLogin ${{ parameters.administratorLogin }}
+        -administratorLoginPassword ${{ parameters.administratorLoginPassword }}
+        -ckanLoginPassword ${{ parameters.ckanLoginPassword }}
+        -virtualNetworkName ${{ parameters.virtualNetworkName }}
+        -subnetName ${{ parameters.subnetName }}
+        -keyVaultName ${{ parameters.keyVaultName }}
+      deploymentMode: "Incremental"
+  - script: |
+      export PGPASSWORD=${{ parameters.administratorLoginPassword }}
+      export PGUSER=${{ parameters.administratorLogin }}@${{ parameters.serverName}}
+      export PGHOST=${{ parameters.serverName}}.postgres.database.azure.com
+      echo "Creating user ${{ parameters.ckanLogin }}"
+      createuser -S -D -R -w ${{ parameters.ckanLogin }}
+      echo "Changing password and granting CREATEDB privilege"
+      psql -d postgres --command="ALTER USER ${{ parameters.ckanLogin }} WITH CREATEDB PASSWORD '${{ parameters.ckanLoginPassword }}'"
+    displayName: Create CKAN user
+  - script: | 
+      export PGPASSWORD=${{ parameters.administratorLoginPassword }}
+      export PGUSER=${{ parameters.administratorLogin }}@${{ parameters.serverName}}
+      export PGHOST=${{ parameters.serverName}}.postgres.database.azure.com
+      if [[ $( psql -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='${{ parameters.ckanDatabaseName }}'" ) = '1' ]]; then
+        echo "'${{ parameters.ckanDatabaseName }}' database already exists, doing nothing"
+      else
+        export PGPASSWORD=${{ parameters.ckanLoginPassword }}
+        export PGUSER=${{ parameters.ckanLogin }}@${{ parameters.serverName}}
+        echo "Creating database '${{ parameters.ckanDatabaseName }}' in the name of '${{ parameters.ckanLogin }}''"
+        createdb -O '${{ parameters.ckanLogin }}' '${{ parameters.ckanDatabaseName }}' -E utf-8
+      fi 
+    displayName: Create CKAN database

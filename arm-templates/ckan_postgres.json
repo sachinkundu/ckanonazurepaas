@@ -1,0 +1,174 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "administratorLogin": {
+            "type": "string"
+        },
+        "administratorLoginPassword": {
+            "type": "securestring"
+        },
+        "ckanLoginPassword": {
+            "type": "securestring"
+        },
+        "location": {
+            "type": "string"
+        },
+        "serverName": {
+            "type": "string"
+        },
+        "skuCapacity": {
+            "type": "int"
+        },
+        "skuFamily": {
+            "type": "string"
+        },
+        "skuName": {
+            "type": "string"
+        },
+        "skuSizeMB": {
+            "type": "int"
+        },
+        "skuTier": {
+            "type": "string"
+        },
+        "version": {
+            "type": "string"
+        },
+        "backupRetentionDays": {
+            "type": "int"
+        },
+        "geoRedundantBackup": {
+            "type": "string"
+        },
+        "previewFeature": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "tags": {
+            "type": "object",
+            "defaultValue": {}
+        },
+        "storageAutoGrow": {
+            "type": "string",
+            "defaultValue": "Disabled"
+        },
+        "infrastructureEncryption": {
+            "type": "string",
+            "defaultValue": "Disabled"
+        },
+        "sslEnforcement": {
+            "type": "string",
+            "defaultValue": "Disabled"
+        },
+
+        "virtualNetworkName": {
+            "type": "string"
+        },
+        "subnetName": {
+            "type": "string",
+            "defaultValue": "default"
+        },
+        "keyVaultName": {
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2017-12-01",
+            "kind": "",
+            "location": "[parameters('location')]",
+            "name": "[parameters('serverName')]",
+            "properties": {
+                "version": "[parameters('version')]",
+                "publicNetworkAccess": "Enabled",
+                "administratorLogin": "[parameters('administratorLogin')]",
+                "administratorLoginPassword": "[parameters('administratorLoginPassword')]",
+                "createMode": "Default",
+                "sslEnforcement": "[parameters('sslEnforcement')]",
+                "storageProfile": {
+                    "storageMB": "[parameters('skuSizeMB')]",
+                    "backupRetentionDays": "[parameters('backupRetentionDays')]",
+                    "geoRedundantBackup": "[parameters('geoRedundantBackup')]",
+                    "storageAutoGrow": "[parameters('storageAutoGrow')]"
+                },
+                "previewFeature": "[parameters('previewFeature')]",
+                "infrastructureEncryption": "[parameters('infrastructureEncryption')]"
+            },
+            "sku": {
+                "name": "[parameters('skuName')]",
+                "tier": "[parameters('skuTier')]",
+                "capacity": "[parameters('skuCapacity')]",
+                "size": "[parameters('skuSizeMB')]",
+                "family": "[parameters('skuFamily')]"
+            },
+            "tags": "[parameters('tags')]",
+            "type": "Microsoft.DBforPostgreSQL/servers",
+            "resources": [
+                {
+                    "name": "[concat(parameters('serverName'),'_VirtualNetworkRule')]",
+                    "type": "virtualNetworkRules",
+                    "apiVersion": "2017-12-01",
+                    "properties": {
+                        "virtualNetworkSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnetName'))]",
+                        "ignoreMissingVnetServiceEndpoint": true
+                      },
+                    "dependsOn": [
+                        "[resourceId('Microsoft.DBforPostgreSQL/servers/', parameters('serverName'))]"
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults/secrets",
+            "name": "[concat(parameters('keyVaultName'), '/',parameters('serverName'),'-administratorLoginPassword')]",
+            "apiVersion": "2019-09-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "value": "[parameters('administratorLoginPassword')]"
+            }
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults/secrets",
+            "name": "[concat(parameters('keyVaultName'), '/',parameters('serverName'),'-ckanLoginPassword')]",
+            "apiVersion": "2019-09-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "value": "[parameters('ckanLoginPassword')]"
+            }
+        },     
+        {
+            "name": "[concat(parameters('serverName'),'/',variables('firewallrules').batch.rules[copyIndex()].Name)]",
+            "type": "Microsoft.DBforPostgreSQL/servers/firewallRules",
+            "apiVersion": "2017-12-01",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforPostgreSQL/servers/', parameters('serverName'))]"
+            ],
+            "copy": {
+                "name": "firewallRulesCopy",
+                "mode": "Serial",
+                "batchSize": 1,
+                "count": "[length(variables('firewallrules').batch.rules)]"
+            },
+            "properties": {
+                "startIpAddress": "[variables('firewallrules').batch.rules[copyIndex()].StartIpAddress]",
+                "endIpAddress": "[variables('firewallrules').batch.rules[copyIndex()].EndIpAddress]"
+            }
+        }
+
+    ],
+    "variables": {
+        "firewallrules": {
+            "batch": {
+                "rules": [
+                    {
+                        "Name": "allowAzure",
+                        "StartIpAddress": "0.0.0.0",
+                        "EndIpAddress": "0.0.0.0"
+                    }
+                ]
+            }
+        }
+    }
+}

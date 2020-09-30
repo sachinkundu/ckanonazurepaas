@@ -1,0 +1,63 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "serverName": {
+            "value": "ckan-postgresql"
+        },
+        "location": {
+            "value": "westeurope"
+        },
+        "skuName": {
+            "value": "GP_Gen5_4"
+        },
+        "skuTier": {
+            "value": "GeneralPurpose"
+        },
+        "skuCapacity": {
+            "value": 4
+        },
+        "skuFamily": {
+            "value": "Gen5"
+        },
+        "skuSizeMB": {
+            "value": 10240
+        },
+        "backupRetentionDays": {
+            "value": 7
+        },
+        "geoRedundantBackup": {
+            "value": "Disabled"
+        },
+        "storageAutoGrow": {
+            "value": "Enabled"
+        },
+        "tags": {
+            "value": {}
+        },
+        "infrastructureEncryption": {
+            "value": "Disabled"
+        },
+        "administratorLogin": {
+            "value": "adminloginname"
+        },
+        "administratorLoginPassword": {
+            "value": null
+        },
+        "previewFeature": {
+            "value": ""
+        },
+        "virtualNetworkName": {
+            "value": null
+        },
+        "subnetName": {
+            "value": null
+        },
+        "keyVaultName": {
+            "value": null
+        },
+        "version": {
+            "value": "11"
+        }
+    }
+}
