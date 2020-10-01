@@ -30,7 +30,9 @@ docker compose up
 CKAN frontend UI is now available on localhost:5000 using port forwarding to the frontend container.
 
 ### Deploying to Azure Container Instances
+You can use the following two methods to deploy the container stack
 
+### Using YAML specification
 You can use ``frontend-ui/aci.yaml`` to deploy the whole stack to Azure Container Instances.
 
 Assuming you have a resource group called ``ckan`` you use
@@ -38,6 +40,19 @@ Assuming you have a resource group called ``ckan`` you use
 ```
 az container create --resource-group ckan --file aci.yaml
 ```
-Make sure to edit the file ``frontend-ui/aci.yaml`` with your environment specific configs before running the above command.
+Make sure to edit ``frontend-ui/aci.yaml`` with your environment specific configs before running the above command.
+
+### Using ARM templates
+
+You can use ``frontend-ui/arm-templates/aci-template.json`` to deploy the whole stack to Azure Container Instances using ARM templates
+
+Assuming you have a resource group called ``ckan`` you can use
+
+```
+templateFile=frontend-ui/arm-templates/aci-template.json
+parametersFile=frontend-ui/arm-templates/aci-parameters.json
+az deployment group create --name ckan-arm --resource-group ckan --template-file $templateFile --parameters $parametersFile
+```
+Make sure to edit ``parametersFile`` with with your environment specific configs before running the above command.
 
 

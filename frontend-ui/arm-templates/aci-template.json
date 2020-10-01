@@ -1,0 +1,173 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "defaultValue": "ckan",
+            "type": "string"
+        },
+        "location": {
+            "defaultValue": "westeurope",
+            "type": "string"
+        },
+        "ckan_image" : {
+            "defaultValue": "sachinkundu/ckan:v1",
+            "type": "string"
+        },
+        "postgres_hostname" : {
+            "defaultValue": "",
+            "type": "string"
+        },
+        "postgres_user" : {
+            "defaultValue": "ckan_default",
+            "type": "string"
+        },
+        "postgres_password" : {
+            "defaultValue": "",
+            "type": "securestring"
+        },
+        "solr_url" : {
+            "defaultValue": "",
+            "type": "string"
+        },
+        "solr_password" : {
+            "defaultValue": "",
+            "type": "securestring"
+        }
+
+    },
+    "variables": {
+        "postgres_qualified_user": "[concat(parameters('postgres_user'), '@', parameters('postgres_hostname'))]",
+        "postgres_authentication_string": "[concat(variables('postgres_qualified_user'), ':', parameters('postgres_password'))]",
+        "postgres_qualified_host": "[concat(parameters('postgres_hostname'), '.postgres.database.azure.com')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.ContainerInstance/containerGroups",
+            "apiVersion": "2019-12-01",
+            "name": "[parameters('name')]",
+            "location": "[parameters('location')]",
+            "tags": {
+                "env": "dev"
+            },
+            "properties": {
+                "sku": "Standard",
+                "containers": [
+                    {
+                        "name": "[parameters('name')]",
+                        "properties": {
+                            "image": "[parameters('ckan_image')]",
+                            "ports": [
+                                {
+                                    "port": 5000
+                                }
+                            ],
+                            "environmentVariables": [
+                                {
+                                    "name": "CKAN_SQLALCHEMY_URL",
+                                    "value": "[concat('postgresql://', variables('postgres_authentication_string'), '@' , variables('postgres_qualified_host'), '/ckan_default?sslmode=require')]"
+                                },
+                                {
+                                    "name": "CKAN_SOLR_URL",
+                                    "value": "[parameters('solr_url')]"
+                                },
+                                {
+                                    "name": "CKAN_SOLR_USER",
+                                    "value": "solr"
+                                },
+                                {
+                                    "name": "CKAN_SOLR_PASSWORD",
+                                    "secureValue": "[parameters('solr_password')]"
+                                },
+                                {
+                                    "name": "CKAN_REDIS_URL",
+                                    "value": "redis://localhost:6379/1"
+                                },
+                                {
+                                    "name": "CKAN_POSTGRES_USER",
+                                    "value": "[variables('postgres_qualified_user')]"
+                                },
+                                {
+                                    "name": "CKAN_POSTGRES_HOST",
+                                    "value": "[variables('postgres_qualified_host')]"
+                                },
+                                {
+                                    "name": "CKAN_DATAPUSHER_URL",
+                                    "value": "http://datapusher:8800"
+                                },
+                                {
+                                    "name": "CKAN_SITE_URL",
+                                    "value": "https://blah.blah"
+                                },
+                                {
+                                    "name": "POSTGRES_PASSWORD",
+                                    "secureValue": "[parameters('postgres_password')]"
+                                }
+                            ],
+                            "resources": {
+                                "requests": {
+                                    "memoryInGB": 4,
+                                    "cpu": 2
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name": "redis",
+                        "properties": {
+                            "image": "redis:latest",
+                            "ports": [
+                                {
+                                    "port": 6379
+                                }
+                            ],
+                            "environmentVariables": [],
+                            "resources": {
+                                "requests": {
+                                    "memoryInGB": 1.5,
+                                    "cpu": 1
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name": "datapusher",
+                        "properties": {
+                            "image": "clementmouchet/datapusher",
+                            "ports": [
+                                {
+                                    "port": 8800
+                                }
+                            ],
+                            "environmentVariables": [],
+                            "resources": {
+                                "requests": {
+                                    "memoryInGB": 1.5,
+                                    "cpu": 1
+                                }
+                            }
+                        }
+                    }
+                ],
+                "initContainers": [],
+                "restartPolicy": "Never",
+                "ipAddress": {
+                    "ports": [
+                        {
+                            "protocol": "TCP",
+                            "port": 5000
+                        }
+                    ],
+                    "type": "Public"
+                },
+                "osType": "Linux"
+            }
+        }
+    ],
+    "outputs": {
+        "containerIPv4Address": {
+          "type": "string",
+          "value": "[reference(resourceId('Microsoft.ContainerInstance/containerGroups/', parameters('name'))).ipAddress.ip]"
+        }
+      }    
+}

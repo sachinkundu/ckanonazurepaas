@@ -1,0 +1,30 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "value": "ckan"
+        },
+        "location": {
+            "value": "westeurope"
+        },
+        "ckan_image" : {
+            "value": "sachinkundu/ckan:v1"
+        },
+        "postgres_hostname": {
+            "value": "whockandb"
+        },
+        "postgres_user": {
+            "value": "ckan_default"
+        },
+        "postgres_password": {
+            "value": ""
+        },
+        "solr_url" : {
+            "value": "https://solr123.azurewebsites.net/solr/ckan/"
+        },
+        "solr_password" : {
+            "value": ""
+        }
+    }
+}

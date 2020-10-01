@@ -105,3 +105,4 @@ venv.bak/
 
 frontend-ui/aci-local.yaml
 frontend-ui/docker-compose-local.yaml
+frontend-ui/arm-templates/aci-parameters-local.json
