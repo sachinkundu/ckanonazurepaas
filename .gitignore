@@ -102,3 +102,6 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+frontend-ui/aci-local.yaml
+frontend-ui/docker-compose-local.yaml
