@@ -1,0 +1,59 @@
+---
+  parameters:
+    - name: name
+      type: string
+    - name: subscriptionId
+      type: string
+    - name: resourceGroup
+      displayName: "Set the deployment environment"
+      type: string
+      default: SRHD-D-EUW-RG01
+      values:
+          - SRHD-D-EUW-RG01
+          - SRHD-S-EUW-RG01
+          - SRHD-T-EUW-RG01
+          - SRHD-P-EUW-RG01
+    - name: location
+      default: westeurope
+      type: string
+    - name: ckan_image
+      default: sachinkundu/ckan:v1
+      type: string
+    - name: postgres_hostname
+      type: string
+    - name: postgres_user
+      default: ckan_default
+      type: string
+    - name: postgres_password
+      type: string
+    - name: solr_url
+      type: string
+    - name: solr_password
+      type: string        
+  
+  variables:
+    - name: azureResourceManagerConnection
+      value: SC-${{ parameters.resourceGroup }}        
+  
+  steps:
+    - task: AzureResourceManagerTemplateDeployment@3
+      displayName: Create CKAN Azure Container Instances
+      inputs:
+        deploymentScope: 'Resource Group'
+        azureResourceManagerConnection: '${{ variables.azureResourceManagerConnection }}'
+        subscriptionId: ${{ parameters.subscriptionId }}
+        action: 'Create Or Update Resource Group'
+        resourceGroupName: '${{ parameters.resourceGroup }}'
+        location: ${{ parameters.location }}
+        templateLocation: 'Linked artifact'
+        csmFile: './frontend-ui/arm-templates/aci-template.json'
+        csmParametersFile: './frontend-ui/arm-templates/aci-parameters.json'
+        overrideParameters: >
+            -name ${{ parameters.name }}
+            -postgres_hostname ${{ parameters.postgres_hostname }}
+            -postgres_user ${{ parameters.postgres_user }}
+            -postgres_password ${{ parameters.postgres_password }}
+            -solr_password ${{ parameters.solr_password }}
+            -solr_url ${{ parameters.solr_url }}
+        deploymentMode: 'Incremental'
+  
