@@ -2,6 +2,7 @@
 parameters:
   - name: solrVersion
     type: string
+    default: "6.5.1"
   - name: subscriptionId
     type: string
   - name: resourceGroupName
@@ -28,7 +29,7 @@ steps:
     filePath: './scripts/solr/New-SolrPackage.ps1'
     pwsh: true
     arguments:
-      -solrVersion $(solrVersion)
+      -solrVersion  ${{ parameters.solrVersion }}
       -configDir ./configuration/solr
   displayName: Create Solr package
 
@@ -44,9 +45,9 @@ steps:
     csmFile: './arm-templates/solr.json'
     csmParametersFile: './arm-templates/solr.parameters.json'
     overrideParameters: >
-    -webAppName ${{ parameters.webAppName }}
-    -location ${{ parameters.location }}
-    -sku ${{ parameters.skuSize }}
+      -webAppName ${{ parameters.webAppName }}
+      -location ${{ parameters.location }}
+      -sku ${{ parameters.skuSize }}
     deploymentMode: 'Incremental'
   displayName: Create Solr webapp
 
