@@ -1,0 +1,43 @@
+---
+trigger:
+  - none
+
+parameters:
+  - name: resourceGroup
+    displayName: "Set the deployment environment"
+    type: string
+    default: SRHD-D-EUW-RG01
+    values:
+      - SRHD-D-EUW-RG01
+      - SRHD-S-EUW-RG01
+      - SRHD-T-EUW-RG01
+      - SRHD-P-EUW-RG01
+
+variables:
+  - name: location
+    value: 'westeurope'
+  - name: azureResourceManagerConnection
+    value: SC-${{ parameters.resourceGroup }}
+  - name: containerRegistryName
+    value: ${{ lower(replace(replace(parameters.resourceGroup, '-RG01', '-ACR'), '-', '')) }}
+
+pool:
+  vmImage: "ubuntu-latest"
+
+steps:
+  - task: AzureCLI@2
+    inputs:
+      azureSubscription: $(azureResourceManagerConnection)
+      scriptType: 'pscore'
+      scriptLocation: 'scriptPath'
+      ScriptPath: './scripts/environment/New-EnvironmentVariables.ps1'
+    displayName: Set Azure Subscription ID to task variables
+
+  - template: ./templates/container-registry.yml
+    parameters:
+      subscriptionId: $(subscriptionId)
+      resourceManagerConnection: $(azureResourceManagerConnection)
+      location: $(location)
+      resourceGroupName: ${{ parameters.resourceGroup }}
+      containerRegistryName: $(containerRegistryName)
+      containerRegistrySku: "Standard"
