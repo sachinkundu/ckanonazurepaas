@@ -3,35 +3,27 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "name": {
-            "defaultValue": "ckan",
             "type": "string"
         },
         "location": {
-            "defaultValue": "westeurope",
             "type": "string"
         },
         "ckan_image" : {
-            "defaultValue": "sachinkundu/ckan:v1",
             "type": "string"
         },
         "postgres_hostname" : {
-            "defaultValue": "",
             "type": "string"
         },
         "postgres_user" : {
-            "defaultValue": "ckan_default",
             "type": "string"
         },
         "postgres_password" : {
-            "defaultValue": "",
             "type": "securestring"
         },
         "solr_url" : {
-            "defaultValue": "",
             "type": "string"
         },
         "solr_password" : {
-            "defaultValue": "",
             "type": "securestring"
         }
 
