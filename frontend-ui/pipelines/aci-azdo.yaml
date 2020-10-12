@@ -8,17 +8,18 @@
       default: sachinkundu/ckan:v1
       type: string
 
-    - name: postgres_password
-      type: string
-
-    - name: solr_password
-      type: string        
   
   variables:
   - template: dev.yaml  
   - name: azureResourceManagerConnection
     value: SC-${{ variables.resourceGroup }}        
   
+  - name: postgres_password
+    value: $(POSTGRESPASSWORD)
+
+  - name: solr_password
+    value: $(SOLRPASSWORD)
+
   steps:
     - task: AzureResourceManagerTemplateDeployment@3
       displayName: Create CKAN Azure Container Instances
@@ -36,8 +37,8 @@
             -name ${{ variables.frontendname }}
             -ckan_image ${{ parameters.ckan_image }}
             -postgres_hostname ${{ variables.postgres_hostname }}
-            -postgres_password ${{ parameters.postgres_password }}
+            -postgres_password ${{ variables.postgres_password }}
             -solr_url ${{ variables.solr_url }}
-            -solr_password ${{ parameters.solr_password }}
+            -solr_password ${{ variables.solr_password }}
         deploymentMode: 'Incremental'
   
