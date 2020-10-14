@@ -21,7 +21,7 @@
             "value": "Gen5"
         },
         "skuSizeMB": {
-            "value": 10240
+            "value": 5120
         },
         "backupRetentionDays": {
             "value": 7
@@ -42,7 +42,7 @@
             "value": "adminloginname"
         },
         "administratorLoginPassword": {
-            "value": null
+            "value": ""
         },
         "previewFeature": {
             "value": ""
@@ -51,9 +51,6 @@
             "value": null
         },
         "subnetName": {
-            "value": null
-        },
-        "keyVaultName": {
             "value": null
         },
         "version": {

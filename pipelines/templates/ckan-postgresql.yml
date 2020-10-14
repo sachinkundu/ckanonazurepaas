@@ -8,43 +8,33 @@ pool:
 container: pipeline_runner
 
 parameters:
-  - name: subscriptionId
-    type: string
-  - name: resourceGroupName
-    type: string
-  - name: azureResourceManagerConnection
-    type: string
-
   - name: location
     type: string
     default: "westeurope"
-  - name: serverName
-    type: string
-  - name: virtualNetworkName
-    type: string
-  - name: subnetName
-    type: string
   - name: administratorLogin
     type: string
     default: "ckanpostgresadmin"
-  - name: administratorLoginPassword
-    type: string
   - name: ckanLogin
     type: string
-    default: "ckan"
-  - name: ckanLoginPassword
-    type: string
+    default: "ckan_default"
   - name: ckanDatabaseName
     type: string
+    default: "ckan_default"
   - name: skuTier
     type: string
     default: "GeneralPurpose"
   - name: skuCapacity
     type: number
     default: 4
+  - name: skuFamily
+    type: string
+    default: "Gen5"
+  - name: skuName
+    type: string
+    default: "GP_Gen5_4"
   - name: skuSizeMB
     type: number
-    default: 10240
+    default: 5120
   - name: backupRetentionDays
     type: number
     default: 7
@@ -60,29 +50,44 @@ parameters:
   - name: sslEnforcement
     type: string
     default: "Enabled"    
-  - name: keyVaultName
-    type: string
   - name: version
     type: string
     default: "11"
+
+variables:
+  - template: dev.yaml  
+  - name: azureResourceManagerConnection
+    value: SC-${{ variables.resourceGroup }}          
+  - name: ckanLoginPassword
+    value: $(POSTGRESPASSWORD)
+  - name: administratorLoginPassword
+    value: $(POSTGRESADMINPASSWORD)
+
 steps:
+  - task: AzureKeyVault@1
+    inputs:
+      azureSubscription: ${{ variables.azureResourceManagerConnection }}
+      keyVaultName: ${{ variables.keyVaultName }}
+      secretsFilter: "POSTGRESPASSWORD,POSTGRESADMINPASSWORD"
+      runAsPreJob: false
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: "Create PostgreSQL"
     inputs:
       deploymentScope: "Resource Group"
-      azureResourceManagerConnection: ${{ parameters.azureResourceManagerConnection }}
-      subscriptionId: ${{ parameters.subscriptionId }}
+      azureResourceManagerConnection: ${{ variables.azureResourceManagerConnection }}
+      subscriptionId: ${{ variables.subscriptionId }}
       action: "Create Or Update Resource Group"
-      resourceGroupName: ${{ parameters.resourceGroupName }}
+      resourceGroupName: ${{ variables.resourceGroup }}
       location: ${{ parameters.location }}
       templateLocation: "Linked artifact"
       csmFile: "./arm-templates/ckan_postgres.json"
-      csmParametersFile: "./arm-templates/ckan_postgres.parameters.json"
       overrideParameters: >
-        -serverName ${{ parameters.serverName }}
+        -serverName ${{ variables.postgresHostName }}
         -location ${{ parameters.location }}
         -skuTier ${{ parameters.skuTier }}
         -skuCapacity ${{ parameters.skuCapacity }}
+        -skuFamily ${{ parameters.skuFamily }}
+        -skuName ${{ parameters.skuName }}
         -skuSizeMB ${{ parameters.skuSizeMB }}
         -backupRetentionDays ${{ parameters.backupRetentionDays }}
         -geoRedundantBackup ${{ parameters.geoRedundantBackup }}
@@ -91,30 +96,28 @@ steps:
         -sslEnforcement ${{ parameters.sslEnforcement }}
         -version ${{ parameters.version }}
         -administratorLogin ${{ parameters.administratorLogin }}
-        -administratorLoginPassword ${{ parameters.administratorLoginPassword }}
-        -ckanLoginPassword ${{ parameters.ckanLoginPassword }}
-        -virtualNetworkName ${{ parameters.virtualNetworkName }}
-        -subnetName ${{ parameters.subnetName }}
-        -keyVaultName ${{ parameters.keyVaultName }}
+        -administratorLoginPassword ${{ variables.administratorLoginPassword }}
+        -virtualNetworkName ${{ variables.virtualNetworkName }}
+        -subnetName ${{ variables.subnetName }}
       deploymentMode: "Incremental"
   - script: |
-      export PGPASSWORD=${{ parameters.administratorLoginPassword }}
-      export PGUSER=${{ parameters.administratorLogin }}@${{ parameters.serverName}}
-      export PGHOST=${{ parameters.serverName}}.postgres.database.azure.com
+      export PGPASSWORD=${{ variables.administratorLoginPassword }}
+      export PGUSER=${{ parameters.administratorLogin }}@${{ variables.postgresHostName }}
+      export PGHOST=${{ variables.postgresHostName }}.postgres.database.azure.com
       echo "Creating user ${{ parameters.ckanLogin }}"
       createuser -S -D -R -w ${{ parameters.ckanLogin }}
       echo "Changing password and granting CREATEDB privilege"
-      psql -d postgres --command="ALTER USER ${{ parameters.ckanLogin }} WITH CREATEDB PASSWORD '${{ parameters.ckanLoginPassword }}'"
+      psql -d postgres --command="ALTER USER ${{ parameters.ckanLogin }} WITH CREATEDB PASSWORD '${{ variables.ckanLoginPassword }}'"
     displayName: Create CKAN user
   - script: | 
-      export PGPASSWORD=${{ parameters.administratorLoginPassword }}
-      export PGUSER=${{ parameters.administratorLogin }}@${{ parameters.serverName}}
-      export PGHOST=${{ parameters.serverName}}.postgres.database.azure.com
+      export PGPASSWORD=${{ variables.administratorLoginPassword }}
+      export PGUSER=${{ parameters.administratorLogin }}@${{ variables.postgresHostName }}
+      export PGHOST=${{ variables.postgresHostName }}.postgres.database.azure.com
       if [[ $( psql -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='${{ parameters.ckanDatabaseName }}'" ) = '1' ]]; then
         echo "'${{ parameters.ckanDatabaseName }}' database already exists, doing nothing"
       else
-        export PGPASSWORD=${{ parameters.ckanLoginPassword }}
-        export PGUSER=${{ parameters.ckanLogin }}@${{ parameters.serverName}}
+        export PGPASSWORD=${{ variables.ckanLoginPassword }}
+        export PGUSER=${{ parameters.ckanLogin }}@${{ variables.postgresHostName }}
         echo "Creating database '${{ parameters.ckanDatabaseName }}' in the name of '${{ parameters.ckanLogin }}''"
         createdb -O '${{ parameters.ckanLogin }}' '${{ parameters.ckanDatabaseName }}' -E utf-8
       fi 

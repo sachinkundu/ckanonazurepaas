@@ -8,9 +8,6 @@
         "administratorLoginPassword": {
             "type": "securestring"
         },
-        "ckanLoginPassword": {
-            "type": "securestring"
-        },
         "location": {
             "type": "string"
         },
@@ -68,9 +65,6 @@
         "subnetName": {
             "type": "string",
             "defaultValue": "default"
-        },
-        "keyVaultName": {
-            "type": "string"
         }
     },
     "resources": [
@@ -119,24 +113,6 @@
                 }
             ]
         },
-        {
-            "type": "Microsoft.KeyVault/vaults/secrets",
-            "name": "[concat(parameters('keyVaultName'), '/',parameters('serverName'),'-administratorLoginPassword')]",
-            "apiVersion": "2019-09-01",
-            "location": "[parameters('location')]",
-            "properties": {
-                "value": "[parameters('administratorLoginPassword')]"
-            }
-        },
-        {
-            "type": "Microsoft.KeyVault/vaults/secrets",
-            "name": "[concat(parameters('keyVaultName'), '/',parameters('serverName'),'-ckanLoginPassword')]",
-            "apiVersion": "2019-09-01",
-            "location": "[parameters('location')]",
-            "properties": {
-                "value": "[parameters('ckanLoginPassword')]"
-            }
-        },     
         {
             "name": "[concat(parameters('serverName'),'/',variables('firewallrules').batch.rules[copyIndex()].Name)]",
             "type": "Microsoft.DBforPostgreSQL/servers/firewallRules",

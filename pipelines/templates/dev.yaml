@@ -1,0 +1,7 @@
+variables:
+  resourceGroup: 'SRHD-D-EUW-RG01'
+  subscriptionId: '8570a647-78f9-4c73-8d5d-a764122bb6e8'
+  keyVaultName: srhddeuwkv 
+  virtualNetworkName: srhddeuwvnet
+  subnetName: default
+  postgresHostName: whodckandb
