@@ -21,6 +21,13 @@
     value: $(SOLRPASSWORD)
 
   steps:
+    - task: AzureKeyVault@1
+      inputs:
+        azureSubscription: '${{ variables.azureResourceManagerConnection }}'
+        KeyVaultName: '${{ variables.keyvaultname }}'
+        SecretsFilter: 'POSTGRESPASSWORD,SOLRPASSWORD'
+        RunAsPreJob: false
+
     - task: AzureResourceManagerTemplateDeployment@3
       displayName: Create CKAN Azure Container Instances
       inputs:
