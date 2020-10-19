@@ -5,3 +5,4 @@ variables:
   virtualNetworkName: srhddeuwvnet
   subnetName: default
   postgresHostName: whodckandb
+  solrAppName: 'ckandsolr'
