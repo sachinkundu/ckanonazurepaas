@@ -25,13 +25,16 @@
         },
         "solr_password" : {
             "type": "securestring"
+        },
+        "registry": {
+            "type": "string"
         }
-
     },
     "variables": {
         "postgres_qualified_user": "[concat(parameters('postgres_user'), '@', parameters('postgres_hostname'))]",
         "postgres_authentication_string": "[concat(variables('postgres_qualified_user'), ':', parameters('postgres_password'))]",
-        "postgres_qualified_host": "[concat(parameters('postgres_hostname'), '.postgres.database.azure.com')]"
+        "postgres_qualified_host": "[concat(parameters('postgres_hostname'), '.postgres.database.azure.com')]",
+        "registryResourceId": "[resourceId(subscription().subscriptionId, resourceGroup().name, 'Microsoft.ContainerRegistry/registries', parameters('registry'))]"
     },
     "resources": [
         {
@@ -42,6 +45,7 @@
             "tags": {
                 "env": "dev"
             },
+            
             "properties": {
                 "sku": "Standard",
                 "containers": [
@@ -143,6 +147,13 @@
                 ],
                 "initContainers": [],
                 "restartPolicy": "Never",
+                "imageRegistryCredentials": [
+                    {
+                      "server": "[reference(variables('registryResourceId'), '2019-05-01').loginServer]",
+                      "username": "[listCredentials(variables('registryResourceId'), '2019-05-01').username]",
+                      "password": "[listCredentials(variables('registryResourceId'), '2019-05-01').passwords[0].value]"
+                    }
+                ],                
                 "ipAddress": {
                     "ports": [
                         {
