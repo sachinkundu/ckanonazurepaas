@@ -1,10 +1,12 @@
 ---
 resources:
   containers:
-  - container: pipeline_runner
-    image: postgres:11
+    - container: pipeline_runner
+      image: postgres:11
+
 pool:
   vmImage: 'ubuntu-18.04'
+
 container: pipeline_runner
 
 parameters:
@@ -49,15 +51,15 @@ parameters:
     default: "Disabled"
   - name: sslEnforcement
     type: string
-    default: "Enabled"    
+    default: "Enabled"
   - name: version
     type: string
     default: "11"
 
 variables:
-  - template: dev.yaml  
+  - template: dev.yaml
   - name: azureResourceManagerConnection
-    value: SC-${{ variables.resourceGroup }}          
+    value: SC-${{ variables.resourceGroup }}
   - name: ckanLoginPassword
     value: $(POSTGRESPASSWORD)
   - name: administratorLoginPassword
@@ -109,7 +111,7 @@ steps:
       echo "Changing password and granting CREATEDB privilege"
       psql -d postgres --command="ALTER USER ${{ parameters.ckanLogin }} WITH CREATEDB PASSWORD '${{ variables.ckanLoginPassword }}'"
     displayName: Create CKAN user
-  - script: | 
+  - script: |
       export PGPASSWORD=${{ variables.administratorLoginPassword }}
       export PGUSER=${{ parameters.administratorLogin }}@${{ variables.postgresHostName }}
       export PGHOST=${{ variables.postgresHostName }}.postgres.database.azure.com
@@ -120,5 +122,5 @@ steps:
         export PGUSER=${{ parameters.ckanLogin }}@${{ variables.postgresHostName }}
         echo "Creating database '${{ parameters.ckanDatabaseName }}' in the name of '${{ parameters.ckanLogin }}''"
         createdb -O '${{ parameters.ckanLogin }}' '${{ parameters.ckanDatabaseName }}' -E utf-8
-      fi 
+      fi
     displayName: Create CKAN database

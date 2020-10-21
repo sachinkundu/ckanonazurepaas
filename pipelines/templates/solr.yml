@@ -17,7 +17,7 @@ parameters:
     type: string
 
 variables:
-  - template: dev.yaml  
+  - template: dev.yaml
   - name: azureResourceManagerConnection
     value: SC-${{ variables.resourceGroup }}
   - name: solr_password
@@ -27,57 +27,57 @@ variables:
 
 steps:
 
-- task: AzureKeyVault@1
-  inputs:
-    azureSubscription: ${{ variables.azureResourceManagerConnection }}
-    keyVaultName: ${{ variables.keyVaultName }}
-    secretsFilter: "SOLRPASSWORD"
-    runAsPreJob: false
+  - task: AzureKeyVault@1
+    inputs:
+      azureSubscription: ${{ variables.azureResourceManagerConnection }}
+      keyVaultName: ${{ variables.keyVaultName }}
+      secretsFilter: "SOLRPASSWORD"
+      runAsPreJob: false
 
-- task: PowerShell@2
-  inputs:
-    filePath: './scripts/solr/New-SolrPackage.ps1'
-    pwsh: true
-    arguments:
-      -solrVersion  ${{ parameters.solrVersion }}
-      -configDir ./configuration/solr
-  displayName: Create Solr package
+  - task: PowerShell@2
+    inputs:
+      filePath: './scripts/solr/New-SolrPackage.ps1'
+      pwsh: true
+      arguments:
+        -solrVersion  ${{ parameters.solrVersion }}
+        -configDir ./configuration/solr
+    displayName: Create Solr package
 
-- task: AzureResourceManagerTemplateDeployment@3
-  inputs:
-    deploymentScope: 'Resource Group'
-    azureResourceManagerConnection: '${{ variables.azureResourceManagerConnection }}'
-    subscriptionId: ${{ variables.subscriptionId }}
-    action: 'Create Or Update Resource Group'
-    resourceGroupName: '${{ variables.resourceGroup }}'
-    location: ${{ parameters.location }}
-    templateLocation: 'Linked artifact'
-    csmFile: './arm-templates/solr.json'
-    csmParametersFile: './arm-templates/solr.parameters.json'
-    overrideParameters: >
-      -webAppName ${{ variables.solrAppName }}
-      -location ${{ parameters.location }}
-      -skuName ${{ parameters.skuName }}
-    deploymentMode: 'Incremental'
-    deploymentOutputs: 'solrDeployOutput'
-  displayName: Create Solr webapp
+  - task: AzureResourceManagerTemplateDeployment@3
+    inputs:
+      deploymentScope: 'Resource Group'
+      azureResourceManagerConnection: '${{ variables.azureResourceManagerConnection }}'
+      subscriptionId: ${{ variables.subscriptionId }}
+      action: 'Create Or Update Resource Group'
+      resourceGroupName: '${{ variables.resourceGroup }}'
+      location: ${{ parameters.location }}
+      templateLocation: 'Linked artifact'
+      csmFile: './arm-templates/solr.json'
+      csmParametersFile: './arm-templates/solr.parameters.json'
+      overrideParameters: >
+        -webAppName ${{ variables.solrAppName }}
+        -location ${{ parameters.location }}
+        -skuName ${{ parameters.skuName }}
+      deploymentMode: 'Incremental'
+      deploymentOutputs: 'solrDeployOutput'
+    displayName: Create Solr webapp
 
-- task: AzureRmWebAppDeployment@4
-  name: SolrDeployment
-  inputs:
-    ConnectionType: 'AzureRM'
-    azureSubscription: '${{ variables.azureResourceManagerConnection }}'
-    appType: 'webAppLinux'
-    WebAppName: ${{ variables.solrAppName }}
-    packageForLinux: '$(System.DefaultWorkingDirectory)/**/solr_setup_package.zip'
-  displayName: Setup Solr
+  - task: AzureRmWebAppDeployment@4
+    name: SolrDeployment
+    inputs:
+      ConnectionType: 'AzureRM'
+      azureSubscription: '${{ variables.azureResourceManagerConnection }}'
+      appType: 'webAppLinux'
+      WebAppName: ${{ variables.solrAppName }}
+      packageForLinux: '$(System.DefaultWorkingDirectory)/**/solr_setup_package.zip'
+    displayName: Setup Solr
 
-- task: PowerShell@2
-  inputs:
-    filePath: './scripts/solr/Set-Solr.ps1'
-    pwsh: true
-    arguments:
-      -solrUrl $(solr_url)
-      -solrPassword ${{ variables.solr_password }}
-      -coreName ${{ parameters.solrCoreName }}
-  displayName: Finish Solr installation
+  - task: PowerShell@2
+    inputs:
+      filePath: './scripts/solr/Set-Solr.ps1'
+      pwsh: true
+      arguments:
+        -solrUrl $(solr_url)
+        -solrPassword ${{ variables.solr_password }}
+        -coreName ${{ parameters.solrCoreName }}
+    displayName: Finish Solr installation

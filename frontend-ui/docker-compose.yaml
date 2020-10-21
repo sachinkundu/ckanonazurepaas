@@ -1,9 +1,10 @@
+---
 version: "3"
 
 volumes:
-  ckan_config:
-  ckan_home:
-  ckan_storage:
+  ckan_config: ""
+  ckan_home: ""
+  ckan_storage: ""
 
 services:
   ckan:
@@ -33,7 +34,7 @@ services:
     container_name: datapusher
     image: clementmouchet/datapusher
     ports:
-        - "8800:8800"      
+      - "8800:8800"
 
   redis:
     container_name: redis

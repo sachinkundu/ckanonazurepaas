@@ -1,3 +1,4 @@
+---
 variables:
   resourceGroup: 'SRHD-D-EUW-RG01'
   frontendname: 'ckan'

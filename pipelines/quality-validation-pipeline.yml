@@ -1,0 +1,19 @@
+---
+trigger:
+  - development
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  - pwsh: ./scripts/agent/Set-AgentTools.ps1
+    displayName: 'Prep agent'
+
+  - pwsh: ./scripts/linting/Confirm-MarkdownLinting.ps1
+    displayName: 'Lint Markdown'
+
+  - pwsh: ./scripts/linting/Confirm-YAMLLinting.ps1
+    displayName: 'Lint YAML'
+
+  - pwsh: ./scripts/linting/Confirm-PowerShellLinting.ps1
+    displayName: 'Lint PowerShell'
