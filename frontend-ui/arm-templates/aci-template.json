@@ -28,13 +28,17 @@
         },
         "registry": {
             "type": "string"
+        },
+        "dns_label": {
+            "type": "string"
         }
     },
     "variables": {
         "postgres_qualified_user": "[concat(parameters('postgres_user'), '@', parameters('postgres_hostname'))]",
         "postgres_authentication_string": "[concat(variables('postgres_qualified_user'), ':', parameters('postgres_password'))]",
         "postgres_qualified_host": "[concat(parameters('postgres_hostname'), '.postgres.database.azure.com')]",
-        "registryResourceId": "[resourceId(subscription().subscriptionId, resourceGroup().name, 'Microsoft.ContainerRegistry/registries', parameters('registry'))]"
+        "registryResourceId": "[resourceId(subscription().subscriptionId, resourceGroup().name, 'Microsoft.ContainerRegistry/registries', parameters('registry'))]",
+        "ckan_site_id": "[concat('http://', parameters('dns_label'), '.westeurope.azurecontainer.io:5000/')]"
     },
     "resources": [
         {
@@ -49,6 +53,42 @@
             "properties": {
                 "sku": "Standard",
                 "containers": [
+                    {
+                        "name": "redis",
+                        "properties": {
+                            "image": "redis:latest",
+                            "ports": [
+                                {
+                                    "port": 6379
+                                }
+                            ],
+                            "environmentVariables": [],
+                            "resources": {
+                                "requests": {
+                                    "memoryInGB": 1.5,
+                                    "cpu": 1
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name": "datapusher",
+                        "properties": {
+                            "image": "clementmouchet/datapusher",
+                            "ports": [
+                                {
+                                    "port": 8800
+                                }
+                            ],
+                            "environmentVariables": [],
+                            "resources": {
+                                "requests": {
+                                    "memoryInGB": 1.5,
+                                    "cpu": 1
+                                }
+                            }
+                        }
+                    },
                     {
                         "name": "[parameters('name')]",
                         "properties": {
@@ -93,7 +133,7 @@
                                 },
                                 {
                                     "name": "CKAN_SITE_URL",
-                                    "value": "https://blah.blah"
+                                    "value": "[variables('ckan_site_id')]"
                                 },
                                 {
                                     "name": "POSTGRES_PASSWORD",
@@ -107,46 +147,10 @@
                                 }
                             }
                         }
-                    },
-                    {
-                        "name": "redis",
-                        "properties": {
-                            "image": "redis:latest",
-                            "ports": [
-                                {
-                                    "port": 6379
-                                }
-                            ],
-                            "environmentVariables": [],
-                            "resources": {
-                                "requests": {
-                                    "memoryInGB": 1.5,
-                                    "cpu": 1
-                                }
-                            }
-                        }
-                    },
-                    {
-                        "name": "datapusher",
-                        "properties": {
-                            "image": "clementmouchet/datapusher",
-                            "ports": [
-                                {
-                                    "port": 8800
-                                }
-                            ],
-                            "environmentVariables": [],
-                            "resources": {
-                                "requests": {
-                                    "memoryInGB": 1.5,
-                                    "cpu": 1
-                                }
-                            }
-                        }
                     }
                 ],
                 "initContainers": [],
-                "restartPolicy": "Never",
+                "restartPolicy": "OnFailure",
                 "imageRegistryCredentials": [
                     {
                       "server": "[reference(variables('registryResourceId'), '2019-05-01').loginServer]",
@@ -161,7 +165,8 @@
                             "port": 5000
                         }
                     ],
-                    "type": "Public"
+                    "type": "Public",
+                    "dnsNameLabel": "[parameters('dns_label')]"
                 },
                 "osType": "Linux"
             }

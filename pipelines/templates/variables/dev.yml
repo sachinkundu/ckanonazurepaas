@@ -1,0 +1,15 @@
+---
+variables:
+  # External resource names (created by other pipelines)
+  resourceGroup: SRHD-D-EUW-RG01
+  keyVaultName: srhddeuwkv
+  virtualNetworkName: srhddeuwvnet
+  subnetName: default
+  registry: srhddeuwacr
+  dnsLabel: srhddeuwckan
+  # Target resource names (created by this pipeline)
+  postgresHostName: shrddeuwckandb
+  solrAppName: shrddeuwckansolr
+  frontendname: shrddeuwckan
+  # Derived
+  azureResourceManagerConnection: SC-${{ variables.resourceGroup }}

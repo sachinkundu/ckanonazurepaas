@@ -1,0 +1,79 @@
+---
+parameters:
+  - name: location
+    default: westeurope
+    type: string
+
+  - name: ckan_image
+    default: sachinkundu/ckan:v1
+    type: string
+
+  - name: resourceGroup
+    type: string
+
+  - name: keyVaultName
+    type: string
+
+  - name: azureResourceManagerConnection
+    type: string
+
+  - name: frontendname
+    type: string
+
+  - name: solr_url
+    type: string
+
+  - name: postgres_hostname
+    type: string
+
+  - name: registry
+    type: string
+
+  - name: dnsLabel
+    type: string
+
+  - name: dependsOn
+    type: object
+    default: []
+
+jobs:
+  - job: DeployCkanFrontendInContainerInstance
+    dependsOn:
+      - ${{ each depends in parameters.dependsOn }}:
+          - ${{ depends }}
+    variables:
+      - name: postgres_password
+        value: $(POSTGRESPASSWORD)
+
+      - name: solr_password
+        value: $(SOLRPASSWORD)
+
+    steps:
+      - task: AzureKeyVault@1
+        inputs:
+          azureSubscription: ${{ parameters.azureResourceManagerConnection }}
+          keyVaultName: ${{ parameters.keyVaultName }}
+          secretsFilter: "POSTGRESPASSWORD,SOLRPASSWORD"
+          runAsPreJob: false
+
+      - task: AzureResourceManagerTemplateDeployment@3
+        displayName: Create CKAN Azure Container Instances
+        inputs:
+          deploymentScope: "Resource Group"
+          azureResourceManagerConnection: "${{ parameters.azureResourceManagerConnection }}"
+          action: "Create Or Update Resource Group"
+          resourceGroupName: "${{ parameters.resourceGroup }}"
+          location: ${{ parameters.location }}
+          templateLocation: "Linked artifact"
+          csmFile: "./frontend-ui/arm-templates/aci-template.json"
+          csmParametersFile: "./frontend-ui/arm-templates/aci-parameters.json"
+          overrideParameters: >
+            -name ${{ parameters.frontendname }}
+            -ckan_image ${{ parameters.ckan_image }}
+            -postgres_hostname ${{ parameters.postgres_hostname }}
+            -postgres_password ${{ variables.postgres_password }}
+            -solr_url ${{ parameters.solr_url }}
+            -solr_password ${{ variables.solr_password }}
+            -registry ${{ parameters.registry }}
+            -dns_label ${{ parameters.dnsLabel }}
+          deploymentMode: "Incremental"
