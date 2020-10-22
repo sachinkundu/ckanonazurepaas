@@ -78,6 +78,7 @@ steps:
       pwsh: true
       arguments:
         -solrUrl $(solr_url)
-        -solrPassword ${{ variables.solr_password }}
+        -solrPwd ${{ variables.solr_password }}
         -coreName ${{ parameters.solrCoreName }}
     displayName: Finish Solr installation
+    continueOnError: true
