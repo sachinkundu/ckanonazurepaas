@@ -1,0 +1,117 @@
+---
+parameters:
+  - name: environment
+    type: string
+  - name: location
+    type: string
+  - name: postgresHostName
+    type: string
+  - name: postgresAdministratorLogin
+    type: string
+  - name: postgresCkanLogin
+    type: string
+  - name: postgresCkanDatabaseName
+    type: string
+  - name: postgresSkuTier
+    type: string
+  - name: postgresCapacity
+    type: number
+  - name: postgresSkuFamily
+    type: string
+  - name: postgresSkuName
+    type: string
+  - name: postgresSizeMB
+    type: number
+  - name: postgresBackupRetentionDays
+    type: number
+  - name: postgresGeoRedundantBackup
+    type: string
+  - name: postgresStorageAutoGrow
+    type: string
+  - name: postgresInfrastructureEncryption
+    type: string
+  - name: postgresSslEnforcement
+    type: string
+  - name: postgresVersion
+    type: string
+  - name: resourceGroup
+    type: string
+  - name: azureResourceManagerConnection
+    type: string
+  - name: keyVaultName
+    type: string
+  - name: virtualNetworkName
+    type: string
+  - name: subnetName
+    type: string
+  - name: solrVersion
+    type: string
+  - name: solrSkuName
+    type: string
+  - name: solrAppName
+    type: string
+  - name: solrCoreName
+    type: string
+  - name: ckan_image
+    type: string
+  - name: frontendname
+    type: string
+  - name: solr_url
+    type: string
+  - name: registry
+    type: string
+  - name: dnsLabel
+    type: string
+
+jobs:
+  - template: ./ckan-postgresql-job.yml
+    parameters:
+      environment: ${{ parameters.environment }}
+      postgresHostName: ${{ parameters.postgresHostName }}
+      location: ${{ parameters.location }}
+      administratorLogin: ${{ parameters.postgresAdministratorLogin }}
+      ckanLogin: ${{ parameters.postgresCkanLogin }}
+      ckanDatabaseName: ${{ parameters.postgresCkanDatabaseName }}
+      skuTier: ${{ parameters.postgresSkuTier }}
+      skuFamily: ${{ parameters.postgresSkuFamily }}
+      skuName: ${{ parameters.postgresSkuName }}
+      geoRedundantBackup: ${{ parameters.postgresGeoRedundantBackup }}
+      storageAutoGrow: ${{ parameters.postgresStorageAutoGrow }}
+      infrastructureEncryption: ${{ parameters.postgresInfrastructureEncryption }}
+      sslEnforcement: ${{ parameters.postgresSslEnforcement }}
+      version: ${{ parameters.postgresVersion }}
+      skuCapacity: ${{ parameters.postgresCapacity }}
+      skuSizeMB: ${{ parameters.postgresSizeMB }}
+      backupRetentionDays: ${{ parameters.postgresBackupRetentionDays }}
+      resourceGroup: ${{ parameters.resourceGroup }}
+      azureResourceManagerConnection: ${{ parameters.azureResourceManagerConnection }}
+      keyVaultName: ${{ parameters.keyVaultName }}
+      virtualNetworkName: ${{ parameters.virtualNetworkName }}
+      subnetName: ${{ parameters.subnetName }}
+  - template: ./solr-job.yml
+    parameters:
+      environment: ${{ parameters.environment }}
+      solrVersion: ${{ parameters.solrVersion }}
+      location: ${{ parameters.location  }}
+      skuName: ${{ parameters.solrSkuName }}
+      solrAppName: ${{ parameters.solrAppName }}
+      solrCoreName: ${{ parameters.solrCoreName }}
+      resourceGroup: ${{ parameters.resourceGroup }}
+      azureResourceManagerConnection: ${{ parameters.azureResourceManagerConnection }}
+      keyVaultName: ${{ parameters.keyVaultName }}
+  - template: ./ckan-aci-job.yml
+    parameters:
+      dependsOn:
+        - ProvisionPostgreSQLForAzure
+        - DeploySolrAppService
+      environment: ${{ parameters.environment }}
+      location: ${{ parameters.location  }}
+      ckan_image: ${{ parameters.ckan_image }}
+      resourceGroup: ${{ parameters.resourceGroup }}
+      keyVaultName: ${{ parameters.keyVaultName }}
+      azureResourceManagerConnection: ${{ parameters.azureResourceManagerConnection }}
+      frontendname: ${{ parameters.frontendname }}
+      solr_url: ${{ parameters.solr_url  }}
+      postgres_hostname: ${{ parameters.postgresHostName }}
+      registry: ${{ parameters.registry }}
+      dnsLabel: ${{ parameters.dnsLabel }}

@@ -1,5 +1,8 @@
 ---
 parameters:
+  - name: environment
+    type: string
+
   - name: solrVersion
     default: "6.5.1"
     type: string
@@ -33,63 +36,68 @@ parameters:
     default: []
 
 jobs:
-  - job: DeploySolrAppService
+  - deployment: DeploySolrAppService
+    environment: ${{ parameters.environment }}
     dependsOn: ${{ parameters.dependsOn }}
     variables:
       - name: solr_password
         value: $(SOLRPASSWORD)
       - name: solr_url
         value: $(SolrDeployment.AppServiceApplicationUrl)/solr
-    steps:
-      - task: AzureKeyVault@1
-        inputs:
-          azureSubscription: ${{ parameters.azureResourceManagerConnection }}
-          keyVaultName: ${{ parameters.keyVaultName }}
-          secretsFilter: "SOLRPASSWORD"
-          runAsPreJob: false
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - checkout: self
+            - task: AzureKeyVault@1
+              inputs:
+                azureSubscription: ${{ parameters.azureResourceManagerConnection }}
+                keyVaultName: ${{ parameters.keyVaultName }}
+                secretsFilter: "SOLRPASSWORD"
+                runAsPreJob: false
 
-      - task: PowerShell@2
-        inputs:
-          filePath: "./scripts/solr/New-SolrPackage.ps1"
-          pwsh: true
-          arguments: -solrVersion  ${{ parameters.solrVersion }}
-            -configDir ./configuration/solr
-        displayName: Create Solr package
+            - task: PowerShell@2
+              inputs:
+                filePath: "./scripts/solr/New-SolrPackage.ps1"
+                pwsh: true
+                arguments: -solrVersion  ${{ parameters.solrVersion }}
+                  -configDir ./configuration/solr
+              displayName: Create Solr package
 
-      - task: AzureResourceManagerTemplateDeployment@3
-        inputs:
-          deploymentScope: "Resource Group"
-          azureResourceManagerConnection: "${{ parameters.azureResourceManagerConnection }}"
-          action: "Create Or Update Resource Group"
-          resourceGroupName: "${{ parameters.resourceGroup }}"
-          location: ${{ parameters.location }}
-          templateLocation: "Linked artifact"
-          csmFile: "./arm-templates/solr.json"
-          csmParametersFile: "./arm-templates/solr.parameters.json"
-          overrideParameters: >
-            -webAppName ${{ parameters.solrAppName }}
-            -location ${{ parameters.location }}
-            -skuName ${{ parameters.skuName }}
-          deploymentMode: "Incremental"
-          deploymentOutputs: "solrDeployOutput"
-        displayName: Create Solr webapp
+            - task: AzureResourceManagerTemplateDeployment@3
+              inputs:
+                deploymentScope: "Resource Group"
+                azureResourceManagerConnection: "${{ parameters.azureResourceManagerConnection }}"
+                action: "Create Or Update Resource Group"
+                resourceGroupName: "${{ parameters.resourceGroup }}"
+                location: ${{ parameters.location }}
+                templateLocation: "Linked artifact"
+                csmFile: "./arm-templates/solr.json"
+                csmParametersFile: "./arm-templates/solr.parameters.json"
+                overrideParameters: >
+                  -webAppName ${{ parameters.solrAppName }}
+                  -location ${{ parameters.location }}
+                  -skuName ${{ parameters.skuName }}
+                deploymentMode: "Incremental"
+                deploymentOutputs: "solrDeployOutput"
+              displayName: Create Solr webapp
 
-      - task: AzureRmWebAppDeployment@4
-        name: SolrDeployment
-        inputs:
-          ConnectionType: "AzureRM"
-          azureSubscription: "${{ parameters.azureResourceManagerConnection }}"
-          appType: "webAppLinux"
-          WebAppName: ${{ parameters.solrAppName }}
-          packageForLinux: "$(System.DefaultWorkingDirectory)/**/solr_setup_package.zip"
-        displayName: Setup Solr
+            - task: AzureRmWebAppDeployment@4
+              name: SolrDeployment
+              inputs:
+                ConnectionType: "AzureRM"
+                azureSubscription: "${{ parameters.azureResourceManagerConnection }}"
+                appType: "webAppLinux"
+                WebAppName: ${{ parameters.solrAppName }}
+                packageForLinux: "$(System.DefaultWorkingDirectory)/**/solr_setup_package.zip"
+              displayName: Setup Solr
 
-      - task: PowerShell@2
-        inputs:
-          filePath: "./scripts/solr/Set-Solr.ps1"
-          pwsh: true
-          arguments: -solrUrl $(solr_url)
-            -solrPwd ${{ variables.solr_password }}
-            -coreName ${{ parameters.solrCoreName }}
-        displayName: Finish Solr installation
-        continueOnError: true
+            - task: PowerShell@2
+              inputs:
+                filePath: "./scripts/solr/Set-Solr.ps1"
+                pwsh: true
+                arguments: -solrUrl $(solr_url)
+                  -solrPwd ${{ variables.solr_password }}
+                  -coreName ${{ parameters.solrCoreName }}
+              displayName: Finish Solr installation
+              continueOnError: true

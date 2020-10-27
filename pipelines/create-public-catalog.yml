@@ -83,51 +83,75 @@ stages:
       - name: solr_url
         value: "https://${{ variables.solrAppName }}.azurewebsites.net/solr/${{ parameters.solrCoreName }}/"
     jobs:
-      - template: ./templates/jobs/ckan-postgresql-job.yml
+      - template: ./templates/jobs/ckan-alljobs.yml
         parameters:
-          postgresHostName: ${{ variables.postgresHostName }}
+          environment: CKANDEV
           location: ${{ parameters.location }}
-          administratorLogin: ${{ parameters.postgresAdministratorLogin }}
-          ckanLogin: ${{ parameters.postgresCkanLogin }}
-          ckanDatabaseName: ${{ parameters.postgresCkanDatabaseName }}
-          skuTier: ${{ parameters.postgresSkuTier }}
-          skuFamily: ${{ parameters.postgresSkuFamily }}
-          skuName: ${{ parameters.postgresSkuName }}
-          geoRedundantBackup: ${{ parameters.postgresGeoRedundantBackup }}
-          storageAutoGrow: ${{ parameters.postgresStorageAutoGrow }}
-          infrastructureEncryption: ${{ parameters.postgresInfrastructureEncryption }}
-          sslEnforcement: ${{ parameters.postgresSslEnforcement }}
-          version: ${{ parameters.postgresVersion }}
-          skuCapacity: ${{ parameters.postgresCapacity }}
-          skuSizeMB: ${{ parameters.postgresSizeMB }}
-          backupRetentionDays: ${{ parameters.postgresBackupRetentionDays }}
+          postgresAdministratorLogin: ${{ parameters.postgresAdministratorLogin }}
+          postgresCkanLogin: ${{ parameters.postgresCkanLogin }}
+          postgresCkanDatabaseName: ${{ parameters.postgresCkanDatabaseName }}
+          postgresSkuTier: ${{ parameters.postgresSkuTier }}
+          postgresSkuFamily: ${{ parameters.postgresSkuFamily }}
+          postgresSkuName: ${{ parameters.postgresSkuName }}
+          postgresGeoRedundantBackup: ${{ parameters.postgresGeoRedundantBackup }}
+          postgresStorageAutoGrow: ${{ parameters.postgresStorageAutoGrow }}
+          postgresInfrastructureEncryption: ${{ parameters.postgresInfrastructureEncryption }}
+          postgresSslEnforcement: ${{ parameters.postgresSslEnforcement }}
+          postgresVersion: ${{ parameters.postgresVersion }}
+          postgresCapacity: ${{ parameters.postgresCapacity }}
+          postgresSizeMB: ${{ parameters.postgresSizeMB }}
+          postgresBackupRetentionDays: ${{ parameters.postgresBackupRetentionDays }}
+          solrVersion: ${{ parameters.solrVersion }}
+          solrSkuName: ${{ parameters.solrSkuName }}
+          solrCoreName: ${{ parameters.solrCoreName }}
+          ckan_image: ${{ parameters.ckanImageName }}
+          postgresHostName: ${{ variables.postgresHostName }}
           resourceGroup: ${{ variables.resourceGroup }}
           azureResourceManagerConnection: ${{ variables.azureResourceManagerConnection }}
           keyVaultName: ${{ variables.keyVaultName }}
           virtualNetworkName: ${{ variables.virtualNetworkName }}
           subnetName: ${{ variables.subnetName }}
-      - template: ./templates/jobs/solr-job.yml
-        parameters:
-          solrVersion: ${{ parameters.solrVersion }}
-          location: ${{ parameters.location  }}
-          skuName: ${{ parameters.solrSkuName }}
           solrAppName: ${{ variables.solrAppName }}
-          solrCoreName: ${{ parameters.solrCoreName }}
-          resourceGroup: ${{ variables.resourceGroup }}
-          azureResourceManagerConnection: ${{ variables.azureResourceManagerConnection }}
-          keyVaultName: ${{ variables.keyVaultName }}
-      - template: ./templates/jobs/ckan-aci-job.yml
-        parameters:
-          dependsOn:
-            - ProvisionPostgreSQLForAzure
-            - DeploySolrAppService
-          location: ${{ parameters.location  }}
-          ckan_image: ${{ parameters.ckanImageName }}
-          resourceGroup: ${{ variables.resourceGroup }}
-          keyVaultName: ${{ variables.keyVaultName }}
-          azureResourceManagerConnection: ${{ variables.azureResourceManagerConnection }}
           frontendname: ${{ variables.frontendname }}
-          solr_url: ${{ variables.solr_url  }}
-          postgres_hostname: ${{ variables.postgresHostName }}
+          solr_url: ${{ variables.solr_url }}
+          registry: ${{ variables.registry }}
+          dnsLabel: ${{ variables.dnsLabel }}
+  - stage: Test
+    variables:
+      - template: ./templates/variables/test.yml
+      - name: solr_url
+        value: "https://${{ variables.solrAppName }}.azurewebsites.net/solr/${{ parameters.solrCoreName }}/"
+    jobs:
+      - template: ./templates/jobs/ckan-alljobs.yml
+        parameters:
+          environment: CKANTEST
+          location: ${{ parameters.location }}
+          postgresAdministratorLogin: ${{ parameters.postgresAdministratorLogin }}
+          postgresCkanLogin: ${{ parameters.postgresCkanLogin }}
+          postgresCkanDatabaseName: ${{ parameters.postgresCkanDatabaseName }}
+          postgresSkuTier: ${{ parameters.postgresSkuTier }}
+          postgresSkuFamily: ${{ parameters.postgresSkuFamily }}
+          postgresSkuName: ${{ parameters.postgresSkuName }}
+          postgresGeoRedundantBackup: ${{ parameters.postgresGeoRedundantBackup }}
+          postgresStorageAutoGrow: ${{ parameters.postgresStorageAutoGrow }}
+          postgresInfrastructureEncryption: ${{ parameters.postgresInfrastructureEncryption }}
+          postgresSslEnforcement: ${{ parameters.postgresSslEnforcement }}
+          postgresVersion: ${{ parameters.postgresVersion }}
+          postgresCapacity: ${{ parameters.postgresCapacity }}
+          postgresSizeMB: ${{ parameters.postgresSizeMB }}
+          postgresBackupRetentionDays: ${{ parameters.postgresBackupRetentionDays }}
+          solrVersion: ${{ parameters.solrVersion }}
+          solrSkuName: ${{ parameters.solrSkuName }}
+          solrCoreName: ${{ parameters.solrCoreName }}
+          ckan_image: ${{ parameters.ckanImageName }}
+          postgresHostName: ${{ variables.postgresHostName }}
+          resourceGroup: ${{ variables.resourceGroup }}
+          azureResourceManagerConnection: ${{ variables.azureResourceManagerConnection }}
+          keyVaultName: ${{ variables.keyVaultName }}
+          virtualNetworkName: ${{ variables.virtualNetworkName }}
+          subnetName: ${{ variables.subnetName }}
+          solrAppName: ${{ variables.solrAppName }}
+          frontendname: ${{ variables.frontendname }}
+          solr_url: ${{ variables.solr_url }}
           registry: ${{ variables.registry }}
           dnsLabel: ${{ variables.dnsLabel }}

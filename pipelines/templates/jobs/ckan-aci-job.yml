@@ -1,5 +1,8 @@
 ---
 parameters:
+  - name: environment
+    type: string
+
   - name: location
     default: westeurope
     type: string
@@ -37,7 +40,8 @@ parameters:
     default: []
 
 jobs:
-  - job: DeployCkanFrontendInContainerInstance
+  - deployment: DeployCkanFrontendInContainerInstance
+    environment: ${{ parameters.environment }}
     dependsOn:
       - ${{ each depends in parameters.dependsOn }}:
           - ${{ depends }}
@@ -48,32 +52,36 @@ jobs:
       - name: solr_password
         value: $(SOLRPASSWORD)
 
-    steps:
-      - task: AzureKeyVault@1
-        inputs:
-          azureSubscription: ${{ parameters.azureResourceManagerConnection }}
-          keyVaultName: ${{ parameters.keyVaultName }}
-          secretsFilter: "POSTGRESPASSWORD,SOLRPASSWORD"
-          runAsPreJob: false
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - checkout: self
+            - task: AzureKeyVault@1
+              inputs:
+                azureSubscription: ${{ parameters.azureResourceManagerConnection }}
+                keyVaultName: ${{ parameters.keyVaultName }}
+                secretsFilter: "POSTGRESPASSWORD,SOLRPASSWORD"
+                runAsPreJob: false
 
-      - task: AzureResourceManagerTemplateDeployment@3
-        displayName: Create CKAN Azure Container Instances
-        inputs:
-          deploymentScope: "Resource Group"
-          azureResourceManagerConnection: "${{ parameters.azureResourceManagerConnection }}"
-          action: "Create Or Update Resource Group"
-          resourceGroupName: "${{ parameters.resourceGroup }}"
-          location: ${{ parameters.location }}
-          templateLocation: "Linked artifact"
-          csmFile: "./frontend-ui/arm-templates/aci-template.json"
-          csmParametersFile: "./frontend-ui/arm-templates/aci-parameters.json"
-          overrideParameters: >
-            -name ${{ parameters.frontendname }}
-            -ckan_image ${{ parameters.ckan_image }}
-            -postgres_hostname ${{ parameters.postgres_hostname }}
-            -postgres_password ${{ variables.postgres_password }}
-            -solr_url ${{ parameters.solr_url }}
-            -solr_password ${{ variables.solr_password }}
-            -registry ${{ parameters.registry }}
-            -dns_label ${{ parameters.dnsLabel }}
-          deploymentMode: "Incremental"
+            - task: AzureResourceManagerTemplateDeployment@3
+              displayName: Create CKAN Azure Container Instances
+              inputs:
+                deploymentScope: "Resource Group"
+                azureResourceManagerConnection: "${{ parameters.azureResourceManagerConnection }}"
+                action: "Create Or Update Resource Group"
+                resourceGroupName: "${{ parameters.resourceGroup }}"
+                location: ${{ parameters.location }}
+                templateLocation: "Linked artifact"
+                csmFile: "./frontend-ui/arm-templates/aci-template.json"
+                csmParametersFile: "./frontend-ui/arm-templates/aci-parameters.json"
+                overrideParameters: >
+                  -name ${{ parameters.frontendname }}
+                  -ckan_image ${{ parameters.ckan_image }}
+                  -postgres_hostname ${{ parameters.postgres_hostname }}
+                  -postgres_password ${{ variables.postgres_password }}
+                  -solr_url ${{ parameters.solr_url }}
+                  -solr_password ${{ variables.solr_password }}
+                  -registry ${{ parameters.registry }}
+                  -dns_label ${{ parameters.dnsLabel }}
+                deploymentMode: "Incremental"

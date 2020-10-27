@@ -1,5 +1,7 @@
 ---
 parameters:
+  - name: environment
+    type: string
   - name: postgresHostName
     type: string
     default: "whockandb"
@@ -64,7 +66,8 @@ parameters:
     default: []
 
 jobs:
-  - job: ProvisionPostgreSQLForAzure
+  - deployment: ProvisionPostgreSQLForAzure
+    environment: ${{ parameters.environment }}
     dependsOn: ${{ parameters.dependsOn }}
     pool:
       vmImage: "ubuntu-18.04"
@@ -74,61 +77,65 @@ jobs:
         value: $(POSTGRESPASSWORD)
       - name: administratorLoginPassword
         value: $(POSTGRESADMINPASSWORD)
-    steps:
-      - task: AzureKeyVault@1
-        inputs:
-          azureSubscription: ${{ parameters.azureResourceManagerConnection }}
-          keyVaultName: ${{ parameters.keyVaultName }}
-          secretsFilter: "POSTGRESPASSWORD,POSTGRESADMINPASSWORD"
-          runAsPreJob: false
-      - task: AzureResourceManagerTemplateDeployment@3
-        displayName: "Create PostgreSQL"
-        inputs:
-          deploymentScope: "Resource Group"
-          azureResourceManagerConnection: ${{ parameters.azureResourceManagerConnection }}
-          action: "Create Or Update Resource Group"
-          resourceGroupName: ${{ parameters.resourceGroup }}
-          location: ${{ parameters.location }}
-          templateLocation: "Linked artifact"
-          csmFile: "./arm-templates/ckan_postgres.json"
-          overrideParameters: >
-            -serverName ${{ parameters.postgresHostName }}
-            -location ${{ parameters.location }}
-            -skuTier ${{ parameters.skuTier }}
-            -skuCapacity ${{ parameters.skuCapacity }}
-            -skuFamily ${{ parameters.skuFamily }}
-            -skuName ${{ parameters.skuName }}
-            -skuSizeMB ${{ parameters.skuSizeMB }}
-            -backupRetentionDays ${{ parameters.backupRetentionDays }}
-            -geoRedundantBackup ${{ parameters.geoRedundantBackup }}
-            -storageAutoGrow ${{ parameters.storageAutoGrow }}
-            -infrastructureEncryption ${{ parameters.infrastructureEncryption }}
-            -sslEnforcement ${{ parameters.sslEnforcement }}
-            -version ${{ parameters.version }}
-            -administratorLogin ${{ parameters.administratorLogin }}
-            -administratorLoginPassword ${{ variables.administratorLoginPassword }}
-            -virtualNetworkName ${{ parameters.virtualNetworkName }}
-            -subnetName ${{ parameters.subnetName }}
-          deploymentMode: "Incremental"
-      - script: |
-          export PGPASSWORD=${{ variables.administratorLoginPassword }}
-          export PGUSER=${{ parameters.administratorLogin }}@${{ parameters.postgresHostName }}
-          export PGHOST=${{ parameters.postgresHostName }}.postgres.database.azure.com
-          echo "Creating user ${{ parameters.ckanLogin }}"
-          createuser -S -D -R -w ${{ parameters.ckanLogin }}
-          echo "Changing password and granting CREATEDB privilege"
-          psql -d postgres --command="ALTER USER ${{ parameters.ckanLogin }} WITH CREATEDB PASSWORD '${{ variables.ckanLoginPassword }}'"
-        displayName: Create CKAN user
-      - script: |
-          export PGPASSWORD=${{ variables.administratorLoginPassword }}
-          export PGUSER=${{ parameters.administratorLogin }}@${{ parameters.postgresHostName }}
-          export PGHOST=${{ parameters.postgresHostName }}.postgres.database.azure.com
-          if [[ $( psql -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='${{ parameters.ckanDatabaseName }}'" ) = '1' ]]; then
-            echo "'${{ parameters.ckanDatabaseName }}' database already exists, doing nothing"
-          else
-            export PGPASSWORD=${{ variables.ckanLoginPassword }}
-            export PGUSER=${{ parameters.ckanLogin }}@${{ parameters.postgresHostName }}
-            echo "Creating database '${{ parameters.ckanDatabaseName }}' in the name of '${{ parameters.ckanLogin }}''"
-            createdb -O '${{ parameters.ckanLogin }}' '${{ parameters.ckanDatabaseName }}' -E utf-8
-          fi
-        displayName: Create CKAN database
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - checkout: self
+            - task: AzureKeyVault@1
+              inputs:
+                azureSubscription: ${{ parameters.azureResourceManagerConnection }}
+                keyVaultName: ${{ parameters.keyVaultName }}
+                secretsFilter: "POSTGRESPASSWORD,POSTGRESADMINPASSWORD"
+                runAsPreJob: false
+            - task: AzureResourceManagerTemplateDeployment@3
+              displayName: "Create PostgreSQL"
+              inputs:
+                deploymentScope: "Resource Group"
+                azureResourceManagerConnection: ${{ parameters.azureResourceManagerConnection }}
+                action: "Create Or Update Resource Group"
+                resourceGroupName: ${{ parameters.resourceGroup }}
+                location: ${{ parameters.location }}
+                templateLocation: "Linked artifact"
+                csmFile: "./arm-templates/ckan_postgres.json"
+                overrideParameters: >
+                  -serverName ${{ parameters.postgresHostName }}
+                  -location ${{ parameters.location }}
+                  -skuTier ${{ parameters.skuTier }}
+                  -skuCapacity ${{ parameters.skuCapacity }}
+                  -skuFamily ${{ parameters.skuFamily }}
+                  -skuName ${{ parameters.skuName }}
+                  -skuSizeMB ${{ parameters.skuSizeMB }}
+                  -backupRetentionDays ${{ parameters.backupRetentionDays }}
+                  -geoRedundantBackup ${{ parameters.geoRedundantBackup }}
+                  -storageAutoGrow ${{ parameters.storageAutoGrow }}
+                  -infrastructureEncryption ${{ parameters.infrastructureEncryption }}
+                  -sslEnforcement ${{ parameters.sslEnforcement }}
+                  -version ${{ parameters.version }}
+                  -administratorLogin ${{ parameters.administratorLogin }}
+                  -administratorLoginPassword ${{ variables.administratorLoginPassword }}
+                  -virtualNetworkName ${{ parameters.virtualNetworkName }}
+                  -subnetName ${{ parameters.subnetName }}
+                deploymentMode: "Incremental"
+            - script: |
+                export PGPASSWORD=${{ variables.administratorLoginPassword }}
+                export PGUSER=${{ parameters.administratorLogin }}@${{ parameters.postgresHostName }}
+                export PGHOST=${{ parameters.postgresHostName }}.postgres.database.azure.com
+                echo "Creating user ${{ parameters.ckanLogin }}"
+                createuser -S -D -R -w ${{ parameters.ckanLogin }}
+                echo "Changing password and granting CREATEDB privilege"
+                psql -d postgres --command="ALTER USER ${{ parameters.ckanLogin }} WITH CREATEDB PASSWORD '${{ variables.ckanLoginPassword }}'"
+              displayName: Create CKAN user
+            - script: |
+                export PGPASSWORD=${{ variables.administratorLoginPassword }}
+                export PGUSER=${{ parameters.administratorLogin }}@${{ parameters.postgresHostName }}
+                export PGHOST=${{ parameters.postgresHostName }}.postgres.database.azure.com
+                if [[ $( psql -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='${{ parameters.ckanDatabaseName }}'" ) = '1' ]]; then
+                  echo "'${{ parameters.ckanDatabaseName }}' database already exists, doing nothing"
+                else
+                  export PGPASSWORD=${{ variables.ckanLoginPassword }}
+                  export PGUSER=${{ parameters.ckanLogin }}@${{ parameters.postgresHostName }}
+                  echo "Creating database '${{ parameters.ckanDatabaseName }}' in the name of '${{ parameters.ckanLogin }}''"
+                  createdb -O '${{ parameters.ckanLogin }}' '${{ parameters.ckanDatabaseName }}' -E utf-8
+                fi
+              displayName: Create CKAN database
