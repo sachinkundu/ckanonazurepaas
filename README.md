@@ -60,3 +60,13 @@ az deployment group create --name ckan-arm --resource-group ckan --template-file
 ```
 
 Make sure to edit `parametersFile` with with your environment specific configs before running the above command.
+
+## Azure DevOps Pipeline for deploying CKAN stack
+
+There is a master pipeline spec `pipelines/create-public-catalog.yml` which can deploy all components to make CKAN stack in a fully automated manner.
+
+It calls template jobs for frontend, solr and postgres which are stored in `pipelines/templates/jobs`. Solr and Postgres are independent pipelines while the frontend job will wait for both to finish before launching as it needs both of the services to be up to boot properly.
+
+Parameters for jobs come from either ARM parameters file if present, default parameters within the template jobs itself or then from environment specific files in `pipelines/templates/variables` folder. Together they comprise all definitions needed to start a CKAN stack.
+
+The stack deployed expects certain infrastructure to be present which is created using the core infra pipeline. In particular it expects a VNET and a subnet within it where to deploy. Also container registry from where to pick ckan frontend container and keyvault from where to store and retrieve password for solr and postgres.
