@@ -61,6 +61,10 @@ parameters:
   - name: subnetName
     type: string
     default: "default"
+  - name: logAnalyticsName
+    type: string
+  - name: diagnosticSettingName
+    type: string
   - name: dependsOn
     type: object
     default: []
@@ -116,6 +120,8 @@ jobs:
                   -administratorLoginPassword ${{ variables.administratorLoginPassword }}
                   -virtualNetworkName ${{ parameters.virtualNetworkName }}
                   -subnetName ${{ parameters.subnetName }}
+                  -logAnalyticsName ${{ parameters.logAnalyticsName }}
+                  -diagnosticSettingName ${{ parameters.diagnosticSettingName }}
                 deploymentMode: "Incremental"
             - script: |
                 export PGPASSWORD=${{ variables.administratorLoginPassword }}

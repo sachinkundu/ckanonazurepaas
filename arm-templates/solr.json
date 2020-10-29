@@ -10,10 +10,14 @@
         },
         "skuName": {
             "type": "string"
+        },
+        "appInsightsName": {
+            "type": "string"
         }
     },
     "variables": {
-        "appServicePlanName": "[concat('AppServicePlan-', parameters('webAppName'))]"
+        "appServicePlanName": "[concat('AppServicePlan-', parameters('webAppName'))]",
+        "appInsightsId": "[resourceId(subscription().subscriptionId, resourceGroup().name, 'Microsoft.Insights/components', parameters('appInsightsName'))]"
     },
     "resources": [
         {
@@ -63,7 +67,26 @@
                 "reserved": false,
                 "isXenon": false,
                 "hyperV": false,
-                "siteConfig": {},
+                "siteConfig": {
+                    "appSettings": [
+                        {
+                            "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                            "value": "[reference(variables('appInsightsId'), '2020-02-02-preview').InstrumentationKey]"
+                        },
+                        {
+                            "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+                            "value": "[reference(variables('appInsightsId'), '2020-02-02-preview').ConnectionString]"
+                        },
+                        {
+                            "name": "ApplicationInsightsAgent_EXTENSION_VERSION",
+                            "value": "~2"
+                        },
+                        {
+                            "name": "XDT_MicrosoftApplicationInsights_Mode",
+                            "value": "default"
+                        }
+                    ]
+                },
                 "scmSiteAlsoStopped": false,
                 "clientAffinityEnabled": false,
                 "clientCertEnabled": false,

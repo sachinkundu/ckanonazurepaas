@@ -7,6 +7,12 @@
         },
         "skuName": {
             "value": "B1"
+        },
+        "webAppName": {
+            "value": ""
+        },
+        "appInsightsName": {
+            "value": ""
         }
      }
   }

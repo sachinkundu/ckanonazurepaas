@@ -35,6 +35,9 @@ parameters:
   - name: dnsLabel
     type: string
 
+  - name: logAnalyticsName
+    type: string
+
   - name: dependsOn
     type: object
     default: []
@@ -84,4 +87,5 @@ jobs:
                   -solr_password ${{ variables.solr_password }}
                   -registry ${{ parameters.registry }}
                   -dns_label ${{ parameters.dnsLabel }}
+                  -logAnalyticsName ${{ parameters.logAnalyticsName }}
                 deploymentMode: "Incremental"

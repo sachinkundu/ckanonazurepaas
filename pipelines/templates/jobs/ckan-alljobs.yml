@@ -62,6 +62,12 @@ parameters:
     type: string
   - name: dnsLabel
     type: string
+  - name: appInsightsName
+    type: string
+  - name: logAnalyticsName
+    type: string
+  - name: diagnosticSettingName
+    type: string
 
 jobs:
   - template: ./ckan-postgresql-job.yml
@@ -88,6 +94,8 @@ jobs:
       keyVaultName: ${{ parameters.keyVaultName }}
       virtualNetworkName: ${{ parameters.virtualNetworkName }}
       subnetName: ${{ parameters.subnetName }}
+      logAnalyticsName: ${{ parameters.logAnalyticsName }}
+      diagnosticSettingName: ${{ parameters.diagnosticSettingName }}
   - template: ./solr-job.yml
     parameters:
       environment: ${{ parameters.environment }}
@@ -99,6 +107,7 @@ jobs:
       resourceGroup: ${{ parameters.resourceGroup }}
       azureResourceManagerConnection: ${{ parameters.azureResourceManagerConnection }}
       keyVaultName: ${{ parameters.keyVaultName }}
+      appInsightsName: ${{ parameters.appInsightsName }}
   - template: ./ckan-aci-job.yml
     parameters:
       dependsOn:
@@ -115,3 +124,4 @@ jobs:
       postgres_hostname: ${{ parameters.postgresHostName }}
       registry: ${{ parameters.registry }}
       dnsLabel: ${{ parameters.dnsLabel }}
+      logAnalyticsName: ${{ parameters.logAnalyticsName }}

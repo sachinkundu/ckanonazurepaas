@@ -28,6 +28,9 @@ parameters:
   - name: keyVaultName
     type: string
 
+  - name: appInsightsName
+    type: string
+
   - name: azureResourceManagerConnection
     type: string
 
@@ -78,6 +81,7 @@ jobs:
                   -webAppName ${{ parameters.solrAppName }}
                   -location ${{ parameters.location }}
                   -skuName ${{ parameters.skuName }}
+                  -appInsightsName ${{ parameters.appInsightsName }}
                 deploymentMode: "Incremental"
                 deploymentOutputs: "solrDeployOutput"
               displayName: Create Solr webapp

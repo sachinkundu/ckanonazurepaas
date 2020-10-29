@@ -116,6 +116,9 @@ stages:
           solr_url: ${{ variables.solr_url }}
           registry: ${{ variables.registry }}
           dnsLabel: ${{ variables.dnsLabel }}
+          appInsightsName: ${{ variables.appInsightsName }}
+          logAnalyticsName: ${{ variables.logAnalyticsName }}
+          diagnosticSettingName: ${{ variables.diagnosticSettingName }}
   - stage: Test
     variables:
       - template: ./templates/variables/test.yml
@@ -155,3 +158,6 @@ stages:
           solr_url: ${{ variables.solr_url }}
           registry: ${{ variables.registry }}
           dnsLabel: ${{ variables.dnsLabel }}
+          appInsightsName: ${{ variables.appInsightsName }}
+          logAnalyticsName: ${{ variables.logAnalyticsName }}
+          diagnosticSettingName: ${{ variables.diagnosticSettingName }}

@@ -31,6 +31,9 @@
         },
         "dns_label": {
             "type": "string"
+        },
+        "logAnalyticsName": {
+            "type": "string"
         }
     },
     "variables": {
@@ -38,7 +41,8 @@
         "postgres_authentication_string": "[concat(variables('postgres_qualified_user'), ':', parameters('postgres_password'))]",
         "postgres_qualified_host": "[concat(parameters('postgres_hostname'), '.postgres.database.azure.com')]",
         "registryResourceId": "[resourceId(subscription().subscriptionId, resourceGroup().name, 'Microsoft.ContainerRegistry/registries', parameters('registry'))]",
-        "ckan_site_id": "[concat('http://', parameters('dns_label'), '.westeurope.azurecontainer.io:5000/')]"
+        "ckan_site_id": "[concat('http://', parameters('dns_label'), '.westeurope.azurecontainer.io:5000/')]",
+        "log_analytics_workspace_id": "[resourceId(subscription().subscriptionId, resourceGroup().name, 'Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsName'))]"
     },
     "resources": [
         {
@@ -149,6 +153,12 @@
                         }
                     }
                 ],
+                "diagnostics": {
+                    "logAnalytics": {
+                        "workspaceId": "[reference(variables('log_analytics_workspace_id'), '2017-03-15-preview').customerId]",
+                        "workspaceKey": "[listKeys(variables('log_analytics_workspace_id'), '2017-03-15-preview').primarySharedKey]"
+                    }
+                },
                 "initContainers": [],
                 "restartPolicy": "OnFailure",
                 "imageRegistryCredentials": [

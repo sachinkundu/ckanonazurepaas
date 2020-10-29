@@ -65,6 +65,12 @@
         "subnetName": {
             "type": "string",
             "defaultValue": "default"
+        },
+        "logAnalyticsName": {
+            "type": "string"
+        },
+        "diagnosticSettingName": {
+            "type": "string"
         }
     },
     "resources": [
@@ -130,6 +136,36 @@
             "properties": {
                 "startIpAddress": "[variables('firewallrules').batch.rules[copyIndex()].StartIpAddress]",
                 "endIpAddress": "[variables('firewallrules').batch.rules[copyIndex()].EndIpAddress]"
+            }
+        },
+        {
+            "name": "[concat(parameters('serverName'), '/Microsoft.Insights/', parameters('diagnosticSettingName'))]",
+            "type": "Microsoft.DBforPostgreSQL/servers/providers/diagnosticsettings",
+            "apiVersion": "2017-05-01-preview",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforPostgreSQL/servers/', parameters('serverName'))]"
+            ],
+            "properties": {
+                "workspaceId": "[concat(resourceGroup().id, '/providers/Microsoft.OperationalInsights/workspaces/', parameters('logAnalyticsName'))]",
+                "logs": [
+                {
+                    "category": "PostgreSQLLogs",
+                    "enabled": true
+                },
+                {
+                    "category": "QueryStoreRuntimeStatistics",
+                    "enabled": true
+                },
+                {
+                    "category": "QueryStoreWaitStatistics",
+                    "enabled": true
+                }],
+                "metrics": [
+                {
+                    "category": "AllMetrics",
+                    "enabled": true
+                }]
             }
         }
 

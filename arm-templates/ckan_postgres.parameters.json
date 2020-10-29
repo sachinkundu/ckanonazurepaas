@@ -55,6 +55,12 @@
         },
         "version": {
             "value": "11"
+        },
+        "logAnalyticsName": {
+            "value": ""
+        },
+        "diagnosticSettingName": {
+            "value": ""
         }
     }
 }

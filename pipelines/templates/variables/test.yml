@@ -7,6 +7,9 @@ variables:
   subnetName: default
   registry: srhdteuwacr
   dnsLabel: srhdteuwckan
+  appInsightsName: srhdteuwai
+  logAnalyticsName: srhdteuwlog
+  diagnosticSettingName: setByPipeline
   # Target resource names (created by this pipeline)
   postgresHostName: shrdteuwckandb
   solrAppName: shrdteuwckansolr
