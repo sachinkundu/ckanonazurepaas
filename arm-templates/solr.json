@@ -13,6 +13,12 @@
         },
         "appInsightsName": {
             "type": "string"
+        },
+        "logAnalyticsName": {
+            "type": "string"
+        },
+        "diagnosticSettingName": {
+            "type": "string"
         }
     },
     "variables": {
@@ -120,11 +126,11 @@
                 ],
                 "netFrameworkVersion": "v4.0",
                 "phpVersion": "5.6",
-                "requestTracingEnabled": false,
+                "requestTracingEnabled": true,
                 "remoteDebuggingEnabled": false,
-                "httpLoggingEnabled": false,
+                "httpLoggingEnabled": true,
                 "logsDirectorySizeLimit": 35,
-                "detailedErrorLoggingEnabled": false,
+                "detailedErrorLoggingEnabled": true,
                 "publishingUsername": "$solr-standalone",
                 "azureStorageAccounts": {},
                 "scmType": "None",
@@ -170,7 +176,54 @@
                 "http20Enabled": false,
                 "minTlsVersion": "1.2",
                 "ftpsState": "AllAllowed",
-                "reservedInstanceCount": 0
+                "reservedInstanceCount": 0,
+                "applicationLogs": {
+                    "fileSystem": {
+                        "level": "Warning"
+                    }
+                },
+                "httpLogs": {
+                    "fileSystem": {
+                        "enabled": true,
+                        "retentionInDays": 14
+                    }
+                },
+                "failedRequestsTracing": {
+                    "enabled": true
+                },
+                "detailedErrorMessages": {
+                    "enabled": true
+                }
+            }
+        },
+        {
+            "name": "[concat(parameters('webAppName'), '/Microsoft.Insights/', parameters('diagnosticSettingName'))]",
+            "type": "Microsoft.Web/sites/providers/diagnosticsettings",
+            "apiVersion": "2017-05-01-preview",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
+            ],
+            "properties": {
+                "workspaceId": "[concat(resourceGroup().id, '/providers/Microsoft.OperationalInsights/workspaces/', parameters('logAnalyticsName'))]",
+                "logs": [
+                {
+                    "category": "AppServiceHTTPLogs",
+                    "enabled": true
+                },
+                {
+                    "category": "AppServicePlatformLogs",
+                    "enabled": true
+                },
+                {
+                    "category": "AppServiceAppLogs",
+                    "enabled": true
+                }],
+                "metrics": [
+                {
+                    "category": "AllMetrics",
+                    "enabled": true
+                }]
             }
         },
         {

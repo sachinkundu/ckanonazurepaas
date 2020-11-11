@@ -34,6 +34,12 @@ parameters:
   - name: azureResourceManagerConnection
     type: string
 
+  - name: logAnalyticsName
+    type: string
+
+  - name: diagnosticSettingName
+    type: string
+
   - name: dependsOn
     type: object
     default: []
@@ -82,6 +88,8 @@ jobs:
                   -location ${{ parameters.location }}
                   -skuName ${{ parameters.skuName }}
                   -appInsightsName ${{ parameters.appInsightsName }}
+                  -logAnalyticsName ${{ parameters.logAnalyticsName }}
+                  -diagnosticSettingName ${{ parameters.diagnosticSettingName }}
                 deploymentMode: "Incremental"
                 deploymentOutputs: "solrDeployOutput"
               displayName: Create Solr webapp

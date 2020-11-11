@@ -70,3 +70,10 @@ It calls template jobs for frontend, solr and postgres which are stored in `pipe
 Parameters for jobs come from either ARM parameters file if present, default parameters within the template jobs itself or then from environment specific files in `pipelines/templates/variables` folder. Together they comprise all definitions needed to start a CKAN stack.
 
 The stack deployed expects certain infrastructure to be present which is created using the core infra pipeline. In particular it expects a VNET and a subnet within it where to deploy. Also container registry from where to pick ckan frontend container and keyvault from where to store and retrieve password for solr and postgres.
+
+## Monitoring CKAN resources
+
+All CKAN resources are connected to Log Analytics workspace, therefore they can be pinned and visualized on custom Azure Dashboard. Solr App Service is also configured to store logs on the File System.
+
+Solr application has its own logging feature as well, log stream can be accessed trough Solr Admin Dashboard after authentication - `https://{solr_hostname}.azurewebsites.net/solr/#/~logging`
+Underneath level of logging can be changed for each category. Solr log files are stored under path `/wwwroot/server/logs` on the App Service.

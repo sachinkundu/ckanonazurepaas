@@ -108,6 +108,8 @@ jobs:
       azureResourceManagerConnection: ${{ parameters.azureResourceManagerConnection }}
       keyVaultName: ${{ parameters.keyVaultName }}
       appInsightsName: ${{ parameters.appInsightsName }}
+      logAnalyticsName: ${{ parameters.logAnalyticsName }}
+      diagnosticSettingName: ${{ parameters.diagnosticSettingName }}
   - template: ./ckan-aci-job.yml
     parameters:
       dependsOn:
