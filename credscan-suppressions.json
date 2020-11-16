@@ -1,0 +1,9 @@
+{
+    "tool": "Credential Scanner",
+    "suppressions": [
+        {
+            "file": "\\configuration\\solr\\security.json",
+            "_justification":  "Only used to enable authentication - changed at end of pipeline"
+        }
+    ]
+}

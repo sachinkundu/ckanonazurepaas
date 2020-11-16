@@ -1,0 +1,19 @@
+---
+trigger:
+  - development
+
+pool:
+  vmImage: 'vs2017-win2016'
+
+steps:
+  - task: CredScan@2
+    displayName: 'Run CredScan'
+    inputs:
+      toolVersion: 'Latest'
+      suppressionsFile: './credscan-suppressions.json'
+
+  - task: PostAnalysis@1
+    displayName: 'Post Analysis'
+    inputs:
+      AllTools: false
+      CredScan: true
