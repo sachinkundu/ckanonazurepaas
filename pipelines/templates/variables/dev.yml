@@ -6,7 +6,6 @@ variables:
   virtualNetworkName: srhddeuwvnet
   subnetName: default
   registry: srhddeuwacr
-  dnsLabel: srhddeuwckan
   appInsightsName: srhddeuwai
   logAnalyticsName: srhddeuwlog
   diagnosticSettingName: setByPipeline

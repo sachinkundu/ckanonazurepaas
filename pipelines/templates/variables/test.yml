@@ -5,8 +5,7 @@ variables:
   keyVaultName: srhdteuwkv
   virtualNetworkName: srhdteuwvnet
   subnetName: default
-  registry: srhdteuwacr
-  dnsLabel: srhdteuwckan
+  registry: srhddeuwacr
   appInsightsName: srhdteuwai
   logAnalyticsName: srhdteuwlog
   diagnosticSettingName: setByPipeline

@@ -36,6 +36,17 @@ set_environment () {
   export CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
   export CKAN_POSTGRES_HOST=${CKAN_POSTGRES_HOST}
   export CKAN_POSTGRES_USER=${CKAN_POSTGRES_USER}
+
+  export CKAN_HOME=/home/ckan
+  export CKAN_VENV=/usr/lib/ckan/venv
+  export CKAN_CONFIG=/etc/ckan
+  export CKAN_STORAGE_PATH=/var/lib/ckan
+}
+
+copy_files () {
+  mkdir -p $CKAN_HOME
+  chown -R ckan:ckan $CKAN_HOME $CKAN_VENV $CKAN_CONFIG $CKAN_STORAGE_PATH
+  cp -rf $CKAN_VENV/src/ckan/ckan/config/who.ini $CKAN_CONFIG/who.ini
 }
 
 write_config () {
@@ -71,5 +82,6 @@ if [ -z "$CKAN_DATAPUSHER_URL" ]; then
 fi
 
 set_environment
+copy_files
 ckan --config "$CONFIG" db init
 exec "$@"

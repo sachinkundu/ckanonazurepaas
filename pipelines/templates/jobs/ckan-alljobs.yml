@@ -60,8 +60,6 @@ parameters:
     type: string
   - name: registry
     type: string
-  - name: dnsLabel
-    type: string
   - name: appInsightsName
     type: string
   - name: logAnalyticsName
@@ -125,5 +123,4 @@ jobs:
       solr_url: ${{ parameters.solr_url  }}
       postgres_hostname: ${{ parameters.postgresHostName }}
       registry: ${{ parameters.registry }}
-      dnsLabel: ${{ parameters.dnsLabel }}
       logAnalyticsName: ${{ parameters.logAnalyticsName }}

@@ -28,7 +28,7 @@ properties:
             value: 'http://datapusher:8800'
           - name: 'CKAN_SITE_URL'
             value: 'https://blah.blah'
-        image: sachinkundu/ckan:v1
+        image: srhddeuwacr.azurecr.io/ckan:4514
         resources:
           requests:
             cpu: 2

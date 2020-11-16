@@ -8,31 +8,31 @@
         "location": {
             "type": "string"
         },
-        "ckan_image" : {
+        "ckan_image": {
             "type": "string"
         },
-        "postgres_hostname" : {
+        "postgres_hostname": {
             "type": "string"
         },
-        "postgres_user" : {
+        "postgres_user": {
             "type": "string"
         },
-        "postgres_password" : {
+        "postgres_password": {
             "type": "securestring"
         },
-        "solr_url" : {
+        "solr_url": {
             "type": "string"
         },
-        "solr_password" : {
+        "solr_password": {
             "type": "securestring"
         },
         "registry": {
             "type": "string"
         },
-        "dns_label": {
+        "logAnalyticsName": {
             "type": "string"
         },
-        "logAnalyticsName": {
+        "environment": {
             "type": "string"
         }
     },
@@ -41,19 +41,63 @@
         "postgres_authentication_string": "[concat(variables('postgres_qualified_user'), ':', parameters('postgres_password'))]",
         "postgres_qualified_host": "[concat(parameters('postgres_hostname'), '.postgres.database.azure.com')]",
         "registryResourceId": "[resourceId(subscription().subscriptionId, resourceGroup().name, 'Microsoft.ContainerRegistry/registries', parameters('registry'))]",
-        "ckan_site_id": "[concat('http://', parameters('dns_label'), '.westeurope.azurecontainer.io:5000/')]",
-        "log_analytics_workspace_id": "[resourceId(subscription().subscriptionId, resourceGroup().name, 'Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsName'))]"
+        "env": "[toLower(take(skip(parameters('environment'),4), 1))]",
+        "dns_label": "[parameters('name')]",
+        "ckan_site_id": "[concat('http://', variables('dns_label'), '.westeurope.azurecontainer.io:5000/')]",
+        "log_analytics_workspace_id": "[resourceId(subscription().subscriptionId, resourceGroup().name, 'Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsName'))]",
+        "storageaccountname": "[concat('srhd', variables('env'), 'euwckanstorage')]",
+        "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageaccountname'))]"
     },
     "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2019-06-01",
+            "name": "[variables('storageaccountname')]",
+            "location": "[parameters('location')]",
+            "kind": "StorageV2",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "accessTier": "Hot"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(variables('storageaccountname'), '/default/', 'config')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageaccountname'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(variables('storageaccountname'), '/default/', 'storage')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageaccountname'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(variables('storageaccountname'), '/default/', 'home')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageaccountname'))]"
+            ]
+        },
         {
             "type": "Microsoft.ContainerInstance/containerGroups",
             "apiVersion": "2019-12-01",
             "name": "[parameters('name')]",
             "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageaccountname'))]"
+            ],
             "tags": {
                 "env": "dev"
             },
-            
             "properties": {
                 "sku": "Standard",
                 "containers": [
@@ -102,6 +146,20 @@
                                     "port": 5000
                                 }
                             ],
+                            "volumeMounts": [
+                                {
+                                    "name": "ckanconfig",
+                                    "mountPath": "/etc/ckan"
+                                },
+                                {
+                                    "name": "ckanhome",
+                                    "mountPath": "/home/ckan"
+                                },
+                                {
+                                    "name": "ckanstorage",
+                                    "mountPath": "/var/lib/ckan"
+                                }
+                            ],
                             "environmentVariables": [
                                 {
                                     "name": "CKAN_SQLALCHEMY_URL",
@@ -142,7 +200,16 @@
                                 {
                                     "name": "POSTGRES_PASSWORD",
                                     "secureValue": "[parameters('postgres_password')]"
-                                }
+                                },
+                                {
+                                    "name": "CKAN_HOME",
+                                    "value": "/home/ckan"
+                                },
+                                {
+                                    "name": "HOME",
+                                    "value": "/home/ckan"
+                                }                                
+
                             ],
                             "resources": {
                                 "requests": {
@@ -163,11 +230,11 @@
                 "restartPolicy": "OnFailure",
                 "imageRegistryCredentials": [
                     {
-                      "server": "[reference(variables('registryResourceId'), '2019-05-01').loginServer]",
-                      "username": "[listCredentials(variables('registryResourceId'), '2019-05-01').username]",
-                      "password": "[listCredentials(variables('registryResourceId'), '2019-05-01').passwords[0].value]"
+                        "server": "[reference(variables('registryResourceId'), '2019-05-01').loginServer]",
+                        "username": "[listCredentials(variables('registryResourceId'), '2019-05-01').username]",
+                        "password": "[listCredentials(variables('registryResourceId'), '2019-05-01').passwords[0].value]"
                     }
-                ],                
+                ],
                 "ipAddress": {
                     "ports": [
                         {
@@ -176,16 +243,42 @@
                         }
                     ],
                     "type": "Public",
-                    "dnsNameLabel": "[parameters('dns_label')]"
+                    "dnsNameLabel": "[variables('dns_label')]"
                 },
+                "volumes": [
+                    {
+                        "name": "ckanconfig",
+                        "azureFile": {
+                            "shareName": "config",
+                            "storageAccountName": "[variables('storageaccountname')]",
+                            "storageAccountKey": "[listKeys(variables('storageAccountId'), '2019-04-01').keys[0].value]"
+                        }
+                    },
+                    {
+                        "name": "ckanhome",
+                        "azureFile": {
+                            "shareName": "home",
+                            "storageAccountName": "[variables('storageaccountname')]",
+                            "storageAccountKey": "[listKeys(variables('storageAccountId'), '2019-04-01').keys[0].value]"
+                        }
+                    },
+                    {
+                        "name": "ckanstorage",
+                        "azureFile": {
+                            "shareName": "storage",
+                            "storageAccountName": "[variables('storageaccountname')]",
+                            "storageAccountKey": "[listKeys(variables('storageAccountId'), '2019-04-01').keys[0].value]"
+                        }
+                    }                                        
+                ],
                 "osType": "Linux"
             }
         }
     ],
     "outputs": {
         "containerIPv4Address": {
-          "type": "string",
-          "value": "[reference(resourceId('Microsoft.ContainerInstance/containerGroups/', parameters('name'))).ipAddress.ip]"
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.ContainerInstance/containerGroups/', parameters('name'))).ipAddress.ip]"
         }
-      }    
+    }
 }

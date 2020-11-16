@@ -74,7 +74,7 @@ parameters:
   - name: ckanImageName
     displayName: "CKAN prebuilt docker image name"
     type: string
-    default: sachinkundu/ckan:v1
+    default: srhddeuwacr.azurecr.io/ckan:4514
 
 stages:
   - stage: Development
@@ -115,7 +115,6 @@ stages:
           frontendname: ${{ variables.frontendname }}
           solr_url: ${{ variables.solr_url }}
           registry: ${{ variables.registry }}
-          dnsLabel: ${{ variables.dnsLabel }}
           appInsightsName: ${{ variables.appInsightsName }}
           logAnalyticsName: ${{ variables.logAnalyticsName }}
           diagnosticSettingName: ${{ variables.diagnosticSettingName }}
@@ -157,7 +156,6 @@ stages:
           frontendname: ${{ variables.frontendname }}
           solr_url: ${{ variables.solr_url }}
           registry: ${{ variables.registry }}
-          dnsLabel: ${{ variables.dnsLabel }}
           appInsightsName: ${{ variables.appInsightsName }}
           logAnalyticsName: ${{ variables.logAnalyticsName }}
           diagnosticSettingName: ${{ variables.diagnosticSettingName }}

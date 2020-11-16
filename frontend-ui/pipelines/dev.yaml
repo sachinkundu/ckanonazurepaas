@@ -6,5 +6,5 @@ variables:
   solr_url: 'https://ckandsolr.azurewebsites.net/solr/ckan/'
   subscriptionId: '8570a647-78f9-4c73-8d5d-a764122bb6e8'
   keyvaultname: 'srhddeuwkv'
-  ckan_image: srhddeuwacr.azurecr.io/ckan:3499
+  ckan_image: srhddeuwacr.azurecr.io/ckan:4514
   registry: srhddeuwacr

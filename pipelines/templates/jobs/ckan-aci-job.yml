@@ -8,7 +8,7 @@ parameters:
     type: string
 
   - name: ckan_image
-    default: sachinkundu/ckan:v1
+    default: srhddeuwacr.azurecr.io/ckan:4514
     type: string
 
   - name: resourceGroup
@@ -30,9 +30,6 @@ parameters:
     type: string
 
   - name: registry
-    type: string
-
-  - name: dnsLabel
     type: string
 
   - name: logAnalyticsName
@@ -79,6 +76,7 @@ jobs:
                 csmFile: "./frontend-ui/arm-templates/aci-template.json"
                 csmParametersFile: "./frontend-ui/arm-templates/aci-parameters.json"
                 overrideParameters: >
+                  -environment "${{ parameters.environment }}"
                   -name ${{ parameters.frontendname }}
                   -ckan_image ${{ parameters.ckan_image }}
                   -postgres_hostname ${{ parameters.postgres_hostname }}
@@ -86,6 +84,5 @@ jobs:
                   -solr_url ${{ parameters.solr_url }}
                   -solr_password ${{ variables.solr_password }}
                   -registry ${{ parameters.registry }}
-                  -dns_label ${{ parameters.dnsLabel }}
                   -logAnalyticsName ${{ parameters.logAnalyticsName }}
                 deploymentMode: "Incremental"
