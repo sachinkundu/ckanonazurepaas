@@ -5,13 +5,13 @@ variables:
   keyVaultName: srhdteuwkv
   virtualNetworkName: srhdteuwvnet
   subnetName: default
-  registry: srhddeuwacr
+  registry: srhdteuwacr
   appInsightsName: srhdteuwai
   logAnalyticsName: srhdteuwlog
   diagnosticSettingName: setByPipeline
   # Target resource names (created by this pipeline)
-  postgresHostName: shrdteuwckandb
-  solrAppName: shrdteuwckansolr
-  frontendname: shrdteuwckan
+  postgresHostName: srhdteuwckandb
+  solrAppName: srhdteuwckansolr
+  frontendname: srhdteuwckan
   # Derived
   azureResourceManagerConnection: SC-${{ variables.resourceGroup }}

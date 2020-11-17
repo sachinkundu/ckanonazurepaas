@@ -10,8 +10,8 @@ variables:
   logAnalyticsName: srhddeuwlog
   diagnosticSettingName: setByPipeline
   # Target resource names (created by this pipeline)
-  postgresHostName: shrddeuwckandb
-  solrAppName: shrddeuwckansolr
-  frontendname: shrddeuwckan
+  postgresHostName: srhddeuwckandb
+  solrAppName: srhddeuwckansolr
+  frontendname: srhddeuwckan
   # Derived
   azureResourceManagerConnection: SC-${{ variables.resourceGroup }}
