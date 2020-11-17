@@ -13,5 +13,6 @@ variables:
   postgresHostName: srhddeuwckandb
   solrAppName: srhddeuwckansolr
   frontendname: srhddeuwckan
+  publicStorageAccountName: srhddeuwckanpubstorage
   # Derived
   azureResourceManagerConnection: SC-${{ variables.resourceGroup }}

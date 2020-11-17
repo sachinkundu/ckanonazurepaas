@@ -1,0 +1,49 @@
+---
+parameters:
+  - name: environment
+    type: string
+
+  - name: location
+    default: westeurope
+    type: string
+
+  - name: resourceGroup
+    type: string
+
+  - name: azureResourceManagerConnection
+    type: string
+
+  - name: publicStorageAccountName
+    type: string
+
+  - name: dependsOn
+    type: object
+    default: []
+
+jobs:
+  - deployment: DeployCKANPublicStorage
+    environment: ${{ parameters.environment }}
+    dependsOn:
+      - ${{ each depends in parameters.dependsOn }}:
+          - ${{ depends }}
+
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - checkout: self
+            - task: AzureResourceManagerTemplateDeployment@3
+              displayName: Create CKAN Public Storage
+              inputs:
+                deploymentScope: "Resource Group"
+                azureResourceManagerConnection: "${{ parameters.azureResourceManagerConnection }}"
+                action: "Create Or Update Resource Group"
+                resourceGroupName: "${{ parameters.resourceGroup }}"
+                location: ${{ parameters.location }}
+                templateLocation: "Linked artifact"
+                csmFile: "./arm-templates/data_lake.json"
+                csmParametersFile: "./arm-templates/data_lake_parameters.json"
+                overrideParameters: >
+                  -storageAccountName ${{ parameters.publicStorageAccountName }}
+                  -location ${{ parameters.location }}
+                deploymentMode: "Incremental"

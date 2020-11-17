@@ -66,6 +66,8 @@ parameters:
     type: string
   - name: diagnosticSettingName
     type: string
+  - name: publicStorageAccountName
+    type: string
 
 jobs:
   - template: ./ckan-postgresql-job.yml
@@ -108,6 +110,13 @@ jobs:
       appInsightsName: ${{ parameters.appInsightsName }}
       logAnalyticsName: ${{ parameters.logAnalyticsName }}
       diagnosticSettingName: ${{ parameters.diagnosticSettingName }}
+  - template: ./ckan-storage-job.yml
+    parameters:
+      environment: ${{ parameters.environment }}
+      resourceGroup: ${{ parameters.resourceGroup }}
+      azureResourceManagerConnection: ${{ parameters.azureResourceManagerConnection }}
+      location: ${{ parameters.location }}
+      publicStorageAccountName: ${{ parameters.publicStorageAccountName }}
   - template: ./ckan-aci-job.yml
     parameters:
       dependsOn:

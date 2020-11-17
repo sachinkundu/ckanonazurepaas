@@ -5,9 +5,6 @@
       "location": {
           "value": "westeurope"
       },
-      "storageAccountName": {
-          "value": "ckanpublicstorage"
-      },
       "storageContainerNames": {
           "value": [
               "data",

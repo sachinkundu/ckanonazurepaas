@@ -118,6 +118,7 @@ stages:
           appInsightsName: ${{ variables.appInsightsName }}
           logAnalyticsName: ${{ variables.logAnalyticsName }}
           diagnosticSettingName: ${{ variables.diagnosticSettingName }}
+          publicStorageAccountName: ${{ variables.publicStorageAccountName }}
   - stage: Test
     variables:
       - template: ./templates/variables/test.yml
@@ -159,3 +160,4 @@ stages:
           appInsightsName: ${{ variables.appInsightsName }}
           logAnalyticsName: ${{ variables.logAnalyticsName }}
           diagnosticSettingName: ${{ variables.diagnosticSettingName }}
+          publicStorageAccountName: ${{ variables.publicStorageAccountName }}
