@@ -54,6 +54,22 @@ write_config () {
   ckan generate config "$CONFIG"
 }
 
+create_sysadmin_user () {
+  echo "Checking if sysadmin user ${CKAN_SYSADMIN_USERNAME} exists..."
+  user=$(ckan -c "$CONFIG" user show "$CKAN_SYSADMIN_USERNAME")
+  not_found="User: None"
+
+  if [ "$user" != "$not_found" ]; then
+    echo "User ${CKAN_SYSADMIN_USERNAME} already exists."
+  else
+    echo "Creating user ${CKAN_SYSADMIN_USERNAME}..."
+    ckan -c "$CONFIG" user add "$CKAN_SYSADMIN_USERNAME" email="$CKAN_SYSADMIN_EMAIL" password="$CKAN_SYSADMIN_PASSWORD"
+  fi
+
+  echo "Promoting user ${CKAN_SYSADMIN_USERNAME} to sysadmin..."
+  ckan -c "$CONFIG" sysadmin add "$CKAN_SYSADMIN_USERNAME"
+}
+
 # Wait for PostgreSQL
 while ! pg_isready -h ${CKAN_POSTGRES_HOST} -U ${CKAN_POSTGRES_USER}; do
   sleep 1;
@@ -81,7 +97,20 @@ if [ -z "$CKAN_DATAPUSHER_URL" ]; then
     abort "ERROR: no CKAN_DATAPUSHER_URL specified in docker-compose.yml"
 fi
 
+if [ -z "$CKAN_SYSADMIN_USERNAME" ]; then
+    abort "ERROR: no CKAN_SYSADMIN_USERNAME specified"
+fi
+
+if [ -z "$CKAN_SYSADMIN_PASSWORD" ]; then
+    abort "ERROR: no CKAN_SYSADMIN_PASSWORD specified"
+fi
+
+if [ -z "$CKAN_SYSADMIN_EMAIL" ]; then
+    abort "ERROR: no CKAN_SYSADMIN_EMAIL specified"
+fi
+
 set_environment
 copy_files
 ckan --config "$CONFIG" db init
+create_sysadmin_user
 exec "$@"

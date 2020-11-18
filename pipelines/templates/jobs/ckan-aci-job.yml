@@ -8,7 +8,7 @@ parameters:
     type: string
 
   - name: ckan_image
-    default: srhddeuwacr.azurecr.io/ckan:4514
+    default: srhddeuwacr.azurecr.io/ckan:4808
     type: string
 
   - name: resourceGroup
@@ -52,6 +52,15 @@ jobs:
       - name: solr_password
         value: $(SOLRPASSWORD)
 
+      - name: ckan_sysadmin_username
+        value: $(CKANSYSADMINUSERNAME)
+
+      - name: ckan_sysadmin_password
+        value: $(CKANSYSADMINPASSWORD)
+
+      - name: ckan_sysadmin_email
+        value: $(CKANSYSADMINEMAIL)
+
     strategy:
       runOnce:
         deploy:
@@ -61,7 +70,7 @@ jobs:
               inputs:
                 azureSubscription: ${{ parameters.azureResourceManagerConnection }}
                 keyVaultName: ${{ parameters.keyVaultName }}
-                secretsFilter: "POSTGRESPASSWORD,SOLRPASSWORD"
+                secretsFilter: "POSTGRESPASSWORD,SOLRPASSWORD,CKANSYSADMINUSERNAME,CKANSYSADMINPASSWORD,CKANSYSADMINEMAIL"
                 runAsPreJob: false
 
             - task: AzureResourceManagerTemplateDeployment@3
@@ -85,4 +94,7 @@ jobs:
                   -solr_password ${{ variables.solr_password }}
                   -registry ${{ parameters.registry }}
                   -logAnalyticsName ${{ parameters.logAnalyticsName }}
+                  -ckan_sysadmin_username ${{ variables.ckan_sysadmin_username }}
+                  -ckan_sysadmin_password ${{ variables.ckan_sysadmin_password }}
+                  -ckan_sysadmin_email ${{ variables.ckan_sysadmin_email }}
                 deploymentMode: "Incremental"

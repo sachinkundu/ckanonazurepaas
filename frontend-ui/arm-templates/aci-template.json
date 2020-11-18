@@ -34,6 +34,15 @@
         },
         "environment": {
             "type": "string"
+        },
+        "ckan_sysadmin_username": {
+            "type": "string"
+        },
+        "ckan_sysadmin_password": {
+            "type": "securestring"
+        },
+        "ckan_sysadmin_email": {
+            "type": "string"
         }
     },
     "variables": {
@@ -208,8 +217,19 @@
                                 {
                                     "name": "HOME",
                                     "value": "/home/ckan"
-                                }                                
-
+                                },
+                                {
+                                    "name": "CKAN_SYSADMIN_USERNAME",
+                                    "value": "[parameters('ckan_sysadmin_username')]"
+                                },
+                                {
+                                    "name": "CKAN_SYSADMIN_PASSWORD",
+                                    "value": "[parameters('ckan_sysadmin_password')]"
+                                },
+                                {
+                                    "name": "CKAN_SYSADMIN_EMAIL",
+                                    "value": "[parameters('ckan_sysadmin_email')]"
+                                }
                             ],
                             "resources": {
                                 "requests": {

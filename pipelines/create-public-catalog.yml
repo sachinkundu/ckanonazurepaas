@@ -74,7 +74,7 @@ parameters:
   - name: ckanImageTagNumber
     displayName: "CKAN prebuilt docker image tag"
     type: string
-    default: 4514
+    default: 4808
 
 stages:
   - stage: Development
