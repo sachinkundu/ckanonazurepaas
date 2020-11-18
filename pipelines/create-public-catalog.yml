@@ -71,10 +71,10 @@ parameters:
     type: string
     default: "SOLRPASSWORD"
   # CKAN
-  - name: ckanImageName
-    displayName: "CKAN prebuilt docker image name"
+  - name: ckanImageTagNumber
+    displayName: "CKAN prebuilt docker image tag"
     type: string
-    default: srhddeuwacr.azurecr.io/ckan:4514
+    default: 4514
 
 stages:
   - stage: Development
@@ -104,7 +104,7 @@ stages:
           solrVersion: ${{ parameters.solrVersion }}
           solrSkuName: ${{ parameters.solrSkuName }}
           solrCoreName: ${{ parameters.solrCoreName }}
-          ckan_image: ${{ parameters.ckanImageName }}
+          ckan_image: "${{ variables.registry }}.azurecr.io/ckan:${{ parameters.ckanImageTagNumber }}"
           postgresHostName: ${{ variables.postgresHostName }}
           resourceGroup: ${{ variables.resourceGroup }}
           azureResourceManagerConnection: ${{ variables.azureResourceManagerConnection }}
@@ -125,6 +125,10 @@ stages:
       - name: solr_url
         value: "https://${{ variables.solrAppName }}.azurewebsites.net/solr/${{ parameters.solrCoreName }}/"
     jobs:
+      - template: ./templates/jobs/push-container-to-test-job.yml
+        parameters:
+          environment: CKANTEST
+          tag: ${{ parameters.ckanImageTagNumber }}
       - template: ./templates/jobs/ckan-alljobs.yml
         parameters:
           environment: CKANTEST
@@ -146,7 +150,7 @@ stages:
           solrVersion: ${{ parameters.solrVersion }}
           solrSkuName: ${{ parameters.solrSkuName }}
           solrCoreName: ${{ parameters.solrCoreName }}
-          ckan_image: ${{ parameters.ckanImageName }}
+          ckan_image: "${{ variables.registry }}.azurecr.io/ckan:${{ parameters.ckanImageTagNumber }}"
           postgresHostName: ${{ variables.postgresHostName }}
           resourceGroup: ${{ variables.resourceGroup }}
           azureResourceManagerConnection: ${{ variables.azureResourceManagerConnection }}

@@ -1,0 +1,41 @@
+---
+parameters:
+
+  - name: environment
+    type: string
+
+  - name: tag
+    type: string
+
+jobs:
+  - deployment: PromoteContainerToTestRegistry
+    environment: ${{ parameters.environment }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - task: Docker@2
+              displayName: Login to Dev ACR
+              inputs:
+                command: login
+                containerRegistry: SC-srhddeuwacr
+            - script: docker pull "srhddeuwacr.azurecr.io/ckan:${{ parameters.tag }}"
+              displayName: Pull dev container
+            - task: Docker@2
+              displayName: Logout of Dev ACR
+              inputs:
+                command: logout
+                containerRegistry: SC-srhddeuwacr
+            - script: docker tag "srhddeuwacr.azurecr.io/ckan:${{ parameters.tag }}" "srhdteuwacr.azurecr.io/ckan:${{ parameters.tag }}"
+            - task: Docker@2
+              displayName: Login to Test ACR
+              inputs:
+                command: login
+                containerRegistry: SC-srhdteuwacr
+            - task: Docker@2
+              displayName: Push to Test ACR
+              inputs:
+                command: push
+                repository: ckan
+                containerRegistry: SC-srhdteuwacr
+                tags: "${{ parameters.tag }}"
