@@ -1,0 +1,73 @@
+---
+trigger:
+  - none
+
+parameters:
+  - name: azureResourceManagerConnection
+    displayName: "Set the deployment environment"
+    type: string
+    default: SRHD-D-EUW-RG01
+    values:
+      - SRHD-D-EUW-RG01
+      - SRHD-S-EUW-RG01
+      - SRHD-T-EUW-RG01
+      - SRHD-P-EUW-RG01
+
+  - name: ckanURL
+    displayName: "Enter the URL for the CKAN instance"
+    type: string
+    default: http://srhddeuwckan.westeurope.azurecontainer.io:5000
+
+  - name: technicalUnit
+    displayName: "Enter technical unit name (can add multiple names with comma separation)"
+    type: string
+    default: NTD
+
+  - name: technicalUnitEmails
+    displayName: "Enter technical unit emails (must match the number of TU names)"
+    type: string
+    default: example@example.com
+
+  - name: apiToken
+    displayName: "API Token name in Key Vault"
+    type: string
+    default: CKANSYSADMINAPITOKEN
+
+variables:
+  - name: location
+    value: 'westeurope'
+  - name: keyVaultName
+    value: ${{ lower(replace(replace(parameters.azureResourceManagerConnection, '-RG01', '-KV'), '-', '')) }}
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  - task: PowerShell@2
+    inputs:
+      filePath: './scripts/agent/Set-AgentTools.ps1'
+      pwsh: true
+    displayName: Setup Agent Tools
+
+  - task: AzureCLI@2
+    inputs:
+      azureSubscription: SC-${{ parameters.azureResourceManagerConnection }}
+      scriptType: 'pscore'
+      scriptLocation: 'scriptPath'
+      scriptPath: './scripts/environment/New-EnvironmentVariables.ps1'
+      addSpnToEnvironment: true
+    displayName: Set Azure Subscription ID to task variables
+
+  - task: AzureCLI@2
+    inputs:
+      azureSubscription: SC-${{ parameters.azureResourceManagerConnection }}
+      scriptType: 'pscore'
+      scriptLocation: 'scriptPath'
+      scriptPath: './scripts/environment/New-CkanUser.ps1'
+    env:
+      KEYVAULT: $(keyVaultName)
+      CKANURL: ${{ parameters.ckanURL }}
+      TECHUNITNAMES: ${{ parameters.technicalUnit }}
+      TECHUNITEMAILS: ${{ parameters.technicalUnitEmails }}
+      APITOKENNAME: ${{ parameters.apiToken }}
+    displayName: Create and permission Tech Unit CKAN users and set API tokens
