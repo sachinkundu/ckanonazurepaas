@@ -32,6 +32,22 @@ jobs:
         deploy:
           steps:
             - checkout: self
+
+            - task: PowerShell@2
+              displayName: Setup Agent Tools
+              inputs:
+                filePath: './scripts/agent/Set-AgentTools.ps1'
+                pwsh: true
+
+            - task: AzureCLI@2
+              displayName: Set Azure Subscription ID to task variables
+              inputs:
+                azureSubscription: ${{ parameters.azureResourceManagerConnection }}
+                scriptType: 'pscore'
+                scriptLocation: 'scriptPath'
+                scriptPath: './scripts/environment/New-EnvironmentVariables.ps1'
+                addSpnToEnvironment: true
+
             - task: AzureResourceManagerTemplateDeployment@3
               displayName: Create CKAN Public Storage
               inputs:
@@ -47,3 +63,16 @@ jobs:
                   -storageAccountName ${{ parameters.publicStorageAccountName }}
                   -location ${{ parameters.location }}
                 deploymentMode: "Incremental"
+
+            - task: AzureCLI@2
+              displayName: Set permissions for DDI ADF user in public storage
+              inputs:
+                azureSubscription: ${{ parameters.azureResourceManagerConnection }}
+                scriptType: 'pscore'
+                scriptLocation: 'scriptPath'
+                scriptPath: './scripts/environment/Set-PublicStorageAccess.ps1'
+              env:
+                STORAGEACCOUNTNAME: ${{ parameters.publicStorageAccountName }}
+                FACTORYNAME: ${{ lower(replace(replace(parameters.resourceGroup, '-RG01', '-DDI'), '-', '')) }}df
+                TECHNICALUNIT: DDI
+                RESOURCEGROUP: "${{ parameters.resourceGroup }}"
