@@ -52,7 +52,7 @@
         "registryResourceId": "[resourceId(subscription().subscriptionId, resourceGroup().name, 'Microsoft.ContainerRegistry/registries', parameters('registry'))]",
         "env": "[toLower(take(skip(parameters('environment'),4), 1))]",
         "dns_label": "[parameters('name')]",
-        "ckan_site_id": "[concat('http://', variables('dns_label'), '.westeurope.azurecontainer.io:5000/')]",
+        "ckan_site_id": "[concat('http://', variables('dns_label'), '.westeurope.azurecontainer.io:80/')]",
         "log_analytics_workspace_id": "[resourceId(subscription().subscriptionId, resourceGroup().name, 'Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsName'))]",
         "storageaccountname": "[concat('srhd', variables('env'), 'euwckanstorage')]",
         "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageaccountname'))]"
@@ -152,7 +152,7 @@
                             "image": "[parameters('ckan_image')]",
                             "ports": [
                                 {
-                                    "port": 5000
+                                    "port": 80
                                 }
                             ],
                             "volumeMounts": [
@@ -259,7 +259,7 @@
                     "ports": [
                         {
                             "protocol": "TCP",
-                            "port": 5000
+                            "port": 80
                         }
                     ],
                     "type": "Public",

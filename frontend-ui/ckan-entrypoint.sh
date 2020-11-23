@@ -1,6 +1,6 @@
 #!/bin/sh
-set -e
 
+set -e
 # URL for the primary database, in the format expected by sqlalchemy (required
 # unless linked to a container called 'db')
 : ${CKAN_SQLALCHEMY_URL:=}
@@ -47,6 +47,7 @@ copy_files () {
   mkdir -p $CKAN_HOME
   chown -R ckan:ckan $CKAN_HOME $CKAN_VENV $CKAN_CONFIG $CKAN_STORAGE_PATH
   cp -rf $CKAN_VENV/src/ckan/ckan/config/who.ini $CKAN_CONFIG/who.ini
+  cp -rf $CONFIG /etc/ckan/default/ckan.ini
 }
 
 write_config () {

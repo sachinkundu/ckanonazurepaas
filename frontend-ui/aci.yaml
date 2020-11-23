@@ -34,7 +34,7 @@ properties:
             cpu: 2
             memoryInGb: 4
         ports:
-          - port: 5000
+          - port: 80
 
     - name: redis
       properties:
@@ -62,6 +62,6 @@ properties:
     type: Public
     ports:
       - protocol: tcp
-        port: 5000
+        port: 80
 tags: {exampleTag: ckan}
 type: Microsoft.ContainerInstance/containerGroups

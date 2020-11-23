@@ -1,0 +1,4 @@
+# it causes problem with scripts in locally built containers if git replaces LF file endings with CRLF
+*.sh text eol=lf
+*.conf text eol=lf
+Dockerfile text eol=lf
