@@ -28,7 +28,7 @@ docker compose build
 docker compose up
 ```
 
-CKAN frontend UI is now available on localhost:5000 using port forwarding to the frontend container.
+CKAN frontend UI is now available on localhost:80 using port forwarding to the frontend container.
 
 ### Deploying to Azure Container Instances
 

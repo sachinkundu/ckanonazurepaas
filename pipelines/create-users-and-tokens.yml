@@ -16,7 +16,7 @@ parameters:
   - name: ckanURL
     displayName: "Enter the URL for the CKAN instance"
     type: string
-    default: http://srhddeuwckan.westeurope.azurecontainer.io:5000
+    default: http://srhddeuwckan.westeurope.azurecontainer.io
 
   - name: technicalUnit
     displayName: "Enter technical unit name (can add multiple names with comma separation)"
