@@ -8,14 +8,13 @@ RUN apt-get update && \
     apt-get install nginx supervisor libcap2-bin -y
 
 ## uwsgi configuration 
-RUN mkdir /etc/ckan/default
 RUN chown -R ckan:ckan /etc/ckan
-RUN cp /usr/lib/ckan/venv/src/ckan/wsgi.py /etc/ckan/default/wsgi.py
-RUN cp /usr/lib/ckan/venv/src/ckan/ckan-uwsgi.ini /etc/ckan/default/ckan-uwsgi.ini 
+RUN cp /usr/lib/ckan/venv/src/ckan/ckan-uwsgi.ini /etc/supervisor/conf.d/ckan-uwsgi.ini 
 #replace python virtualenv location
-RUN sed -i 's/usr\/lib\/ckan\/default/usr\/lib\/ckan\/venv/g'  /etc/ckan/default/ckan-uwsgi.ini 
+RUN sed -i 's/etc\/ckan\/default/etc\/ckan/g'  /etc/supervisor/conf.d/ckan-uwsgi.ini 
+RUN sed -i 's/usr\/lib\/ckan\/default/usr\/lib\/ckan\/venv/g'  /etc/supervisor/conf.d/ckan-uwsgi.ini 
 #remove uid, guid lines as uswgi will run in the executing users name
-RUN sed -i '4,5d' /etc/ckan/default/ckan-uwsgi.ini 
+RUN sed -i '4,5d' /etc/supervisor/conf.d/ckan-uwsgi.ini
 # Patch to make sure Azure Postgres works
 RUN sed -i '269s/.*/          "sqlalchemy.url", str(self.metadata.bind.url).replace("%40","@")/' /usr/lib/ckan/venv/src/ckan/ckan/model/__init__.py
 

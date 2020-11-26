@@ -45,9 +45,10 @@ set_environment () {
 
 copy_files () {
   mkdir -p $CKAN_HOME
-  chown -R ckan:ckan $CKAN_HOME $CKAN_VENV $CKAN_CONFIG $CKAN_STORAGE_PATH
+  chown -R ckan:ckan $CKAN_HOME $CKAN_CONFIG $CKAN_STORAGE_PATH
   cp -rf $CKAN_VENV/src/ckan/ckan/config/who.ini $CKAN_CONFIG/who.ini
-  cp -rf $CONFIG /etc/ckan/default/ckan.ini
+  cp -rf $CONFIG /etc/ckan/ckan.ini
+  cp -rf $CKAN_VENV/src/ckan/wsgi.py /etc/ckan/wsgi.py
 }
 
 write_config () {
