@@ -63,7 +63,7 @@ steps:
       azureSubscription: SC-${{ parameters.azureResourceManagerConnection }}
       scriptType: 'pscore'
       scriptLocation: 'scriptPath'
-      scriptPath: './scripts/environment/New-CkanUser.ps1'
+      scriptPath: './scripts/environment/New-CkanOrgAndUser.ps1'
     env:
       KEYVAULT: $(keyVaultName)
       CKANURL: ${{ parameters.ckanURL }}

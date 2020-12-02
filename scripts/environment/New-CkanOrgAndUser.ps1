@@ -7,11 +7,69 @@ $userNames = $env:TECHUNITNAMES.Split(",")
 $emails = $env:TECHUNITEMAILS.Split(",")
 
 if ($userNames.Count -ne $emails.Count) {
-    Write-Error "The user name and email counts are not matching!" -ErrorAction Stop
+    Write-Error "`nThe user name and email counts are not matching!" -ErrorAction Stop
 }
 
 $headers = @{
     Authorization = "$apiToken"
+}
+
+# Create Technical Unit organization if it doesn't exists
+try {
+    $response = Invoke-WebRequest `
+        -Uri "$($ckanURL)organization_list" `
+        -Method GET `
+        -Headers $headers `
+        -ErrorAction Stop
+
+    $statusCode = $response.StatusCode
+
+    $existingOrgs = ($response.Content | ConvertFrom-Json).result
+}
+catch {
+    $statusCode = $_.Exception.Response.StatusCode.value__
+
+    Write-Error "`nCouldn't retrieve organization list!"
+    Write-Error $Error[0]
+    Break
+}
+
+if ($statusCode -eq 200) {
+    for ($i = 0; $i -lt $userNames.Count; $i++) {
+        $orgName = $userNames[$i]
+
+        if ($existingOrgs -NotContains $orgName.ToLower()) {
+            try {
+                # Display name will only be set in upper case if title is also set
+                $org = @{
+                    name = $orgName.ToLower();
+                    display_name = $orgName;
+                    title = $orgName
+                } | ConvertTo-Json
+
+                $response = Invoke-WebRequest `
+                    -Uri "$($ckanURL)organization_create" `
+                    -Method POST `
+                    -Body $org `
+                    -Headers $headers `
+                    -ContentType 'application/json' `
+                    -ErrorAction Stop
+
+                $statusCode = $response.StatusCode
+
+                Write-Information -MessageData "`nOrganization named `"$($orgName)`" was created" -InformationAction Continue
+            }
+            catch {
+                $statusCode = $_.Exception.Response.StatusCode.value__
+
+                Write-Error "`nCouldn't create organization!"
+                Write-Error $Error[0]
+                Break
+            }
+        } else {
+            Write-Information -MessageData "`nOrganization named `"$($orgName)`" already exists" -InformationAction Continue
+        }
+    }
 }
 
 # Get the list of current users
@@ -29,7 +87,7 @@ try {
 catch {
     $statusCode = $_.Exception.Response.StatusCode.value__
 
-    Write-Error "Couldn't retrieve user list!"
+    Write-Error "`nCouldn't retrieve user list!"
     Write-Error $Error[0]
     Break
 }
@@ -71,7 +129,7 @@ if ($statusCode -eq 200) {
 
                 $statusCode = $response.StatusCode
 
-                Write-Output "$($userName) updated"
+                Write-Information -MessageData "`n$($userName) updated" -InformationAction Continue
             } else {
                 $user = $user | ConvertTo-Json
 
@@ -85,21 +143,21 @@ if ($statusCode -eq 200) {
 
                 $statusCode = $response.StatusCode
 
-                Write-Output "$($userName) created"
+                Write-Information -MessageData "`n$($userName) created" -InformationAction Continue
             }
 
             # If successful, save user name and password to Key Vault
             $keyVaultVaule = az keyvault secret set --name "ckan-$($tuName)-api-user-name" --vault-name $env:KEYVAULT --value $userName --query "name"
-            Write-Output "$($keyVaultVaule) created in Key Vault"
+            Write-Information -MessageData "`n$($keyVaultVaule) created in Key Vault" -InformationAction Continue
 
             $keyVaultVaule = az keyvault secret set --name "ckan-$($tuName)-api-user-password" --vault-name $env:KEYVAULT --value $password --query "name"
-            Write-Output "$($keyVaultVaule) created in Key Vault"
+            Write-Information -MessageData "`n$($keyVaultVaule) created in Key Vault" -InformationAction Continue
 
         }
         catch {
             $statusCode = $_.Exception.Response.StatusCode.value__
 
-            Write-Error "Couldn't create/update user!"
+            Write-Error "`nCouldn't create/update user!"
             Write-Error $Error[0]
             Break
         }
@@ -137,7 +195,7 @@ if ($statusCode -eq 200) {
                         -ContentType 'application/json' `
                         -ErrorAction Stop
 
-                    Write-Output "Old token revoked"
+                    Write-Information -MessageData "`nOld token revoked" -InformationAction Continue
                 }
 
                 # Create API token for user
@@ -150,21 +208,18 @@ if ($statusCode -eq 200) {
                     -ErrorAction Stop
 
                 $token = ($response | ConvertFrom-Json).result.token
-                $statusCode = $response.StatusCode
 
-                Write-Output "New token created"
+                Write-Information -MessageData "`nNew token created" -InformationAction Continue
 
                 # If successful, save token and token name to Key Vault
                 $keyVaultVaule = az keyvault secret set --name "ckan-$($tuName)-api-user-token-name" --vault-name $env:KEYVAULT --value $tokenName --query "name"
-                Write-Output "$($keyVaultVaule) created in Key Vault"
+                Write-Information -MessageData "`n$($keyVaultVaule) created in Key Vault" -InformationAction Continue
 
                 $keyVaultVaule = az keyvault secret set --name "ckan-$($tuName)-api-user-token" --vault-name $env:KEYVAULT --value $token --query "name"
-                Write-Output "$($keyVaultVaule) created in Key Vault"
+                Write-Information -MessageData "`n$($keyVaultVaule) created in Key Vault" -InformationAction Continue
             }
             catch {
-                $statusCode = $_.Exception.Response.StatusCode.value__
-
-                Write-Error "Couldn't create API Token!"
+                Write-Error "`nCouldn't create API Token!"
                 Write-Error $Error[0]
                 Break
             }
@@ -186,14 +241,10 @@ if ($statusCode -eq 200) {
                     -ContentType 'application/json' `
                     -ErrorAction Stop
 
-                $statusCode = $response.StatusCode
-
-                Write-Output "$($userName) added to $($tuName) organization"
+                Write-Information -MessageData "`n$($userName) added to $($tuName) organization" -InformationAction Continue
             }
             catch {
-                $statusCode = $_.Exception.Response.StatusCode.value__
-
-                Write-Error "Couldn't add user to organization!"
+                Write-Error "`nCouldn't add user to organization!"
                 Write-Error $Error[0]
                 Break
             }
