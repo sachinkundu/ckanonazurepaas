@@ -1,13 +1,15 @@
 # Create Public Catalog pipeline
 
+Master pipeline: [`pipelines/create-public-catalog.yml`](../pipelines/create-public-catalog.yml)
+
 ## Prerequisites
 
 The following resources are required and presumed to exist:
 
 * Resource Group
 * KeyVault
-  * Secret with name SOLRPASSWORD  
-  * Secret with name POSTGRESPASSWORD
+  * Secrets with name SOLRPASSWORD, POSTGRESPASSWORD, CKANSYSADMINUSERNAME, CKANSYSADMINPASSWORD and CKANSYSADMINEMAIL
+  * All secret should have appropriate value to set upfront as the pipeline only retrieves their value
 * Virtual Network
 * Subnet in Virtual Network
 * Container Registry
@@ -25,6 +27,8 @@ The following resources are created by the pipeline
   * Creates a single Solr core for CKAN
   * Changes administrator password to the one stored in KeyVault.
 * CKAN website in a container, configured utilize the previous two services.
+* Storage account for attaching Azure File volumes to CKAN container to preserve stored state.
+* Storage account for supporting files to dataset publish.
 Properties
 * The deployments are idempotent, if executed multiple times with the same parameters no changes are made.
 * If some parameters are changed, it is **not** guaranteed that the configuration of the services is updated correctly (e.g. if resource name is changed, the older version is not deleted and data not migrated)!
@@ -42,11 +46,13 @@ Properties
 
 ## Environments
 
-All deployment environments have a corresponding stage in the pipeline. When selecting multiple stages, there will be a dependency between them so before deploying to TEST, the same release has to be deployed to DEV first. This can be avoided by selecting the TEST stage only. On stages with manual approval obsolete runs do not get cancelled automatically.
+All deployment environments have a corresponding stage in the pipeline and there is a certain dependency between them. By creating a new release, DEV environment is provisioned first and after that it can be run to TEST and at last to PROD stages. To provision TEST and PROD environments an approval is needed upfront. Users also can differ from this chain deployment process and select only some of these stages to run (on the pipeline paramets window, under Advanced Options section). Pending approvals for a certain release are not cancelled automatically after a newer release has been run.
+
 |Name       |Approval?            | Triggers?  |
 |-----------|---------------------|------------|
 |CKANDEV    |None                 |            |
 |CKANTEST   |Manual (SRHD Team)   |            |
+|CKANPROD   |Manual (SRHD Team)   |            |
 
 ### Creating new environments
 
