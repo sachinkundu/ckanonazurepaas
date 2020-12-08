@@ -1,7 +1,7 @@
 ---
 variables:
   # External resource names (created by other pipelines)
-  resourceGroup: SRHD-D-EUW-RG01
+  resourceGroup: SRHD-P-EUW-RG01
   keyVaultName: ${{ lower(replace(replace(variables.resourceGroup, '-RG01', '-KV'), '-', '')) }}
   virtualNetworkName: ${{ lower(replace(replace(variables.resourceGroup, '-RG01', '-VNET'), '-', '')) }}
   subnetName: subnet01

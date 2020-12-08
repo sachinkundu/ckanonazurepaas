@@ -7,6 +7,12 @@ parameters:
   - name: tag
     type: string
 
+  - name: fromACR
+    type: string
+
+  - name: toACR
+    type: string
+
 jobs:
   - deployment: PromoteContainerToTestRegistry
     environment: ${{ parameters.environment }}
@@ -18,24 +24,24 @@ jobs:
               displayName: Login to Dev ACR
               inputs:
                 command: login
-                containerRegistry: SC-srhddeuwacr
-            - script: docker pull "srhddeuwacr.azurecr.io/ckan:${{ parameters.tag }}"
+                containerRegistry: SC-${{ parameters.fromACR }}
+            - script: docker pull "${{ parameters.fromACR }}.azurecr.io/ckan:${{ parameters.tag }}"
               displayName: Pull dev container
             - task: Docker@2
               displayName: Logout of Dev ACR
               inputs:
                 command: logout
-                containerRegistry: SC-srhddeuwacr
-            - script: docker tag "srhddeuwacr.azurecr.io/ckan:${{ parameters.tag }}" "srhdteuwacr.azurecr.io/ckan:${{ parameters.tag }}"
+                containerRegistry: SC-${{ parameters.fromACR }}
+            - script: docker tag "${{ parameters.fromACR }}.azurecr.io/ckan:${{ parameters.tag }}" "${{ parameters.toACR }}.azurecr.io/ckan:${{ parameters.tag }}"
             - task: Docker@2
               displayName: Login to Test ACR
               inputs:
                 command: login
-                containerRegistry: SC-srhdteuwacr
+                containerRegistry: SC-${{ parameters.toACR }}
             - task: Docker@2
               displayName: Push to Test ACR
               inputs:
                 command: push
                 repository: ckan
-                containerRegistry: SC-srhdteuwacr
+                containerRegistry: SC-${{ parameters.toACR }}
                 tags: "${{ parameters.tag }}"

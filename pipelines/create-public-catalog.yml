@@ -119,19 +119,71 @@ stages:
           logAnalyticsName: ${{ variables.logAnalyticsName }}
           diagnosticSettingName: ${{ variables.diagnosticSettingName }}
           publicStorageAccountName: ${{ variables.publicStorageAccountName }}
+
   - stage: Test
     variables:
       - template: ./templates/variables/test.yml
       - name: solr_url
         value: "https://${{ variables.solrAppName }}.azurewebsites.net/solr/${{ parameters.solrCoreName }}/"
     jobs:
-      - template: ./templates/jobs/push-container-to-test-job.yml
+      - template: ./templates/jobs/promote-container-job.yml
         parameters:
           environment: CKANTEST
           tag: ${{ parameters.ckanImageTagNumber }}
+          fromACR: ${{ replace(variables.registry, 'srhdt', 'srhdd') }}
+          toACR: ${{ variables.registry }}
       - template: ./templates/jobs/ckan-alljobs.yml
         parameters:
           environment: CKANTEST
+          location: ${{ parameters.location }}
+          postgresAdministratorLogin: ${{ parameters.postgresAdministratorLogin }}
+          postgresCkanLogin: ${{ parameters.postgresCkanLogin }}
+          postgresCkanDatabaseName: ${{ parameters.postgresCkanDatabaseName }}
+          postgresSkuTier: ${{ parameters.postgresSkuTier }}
+          postgresSkuFamily: ${{ parameters.postgresSkuFamily }}
+          postgresSkuName: ${{ parameters.postgresSkuName }}
+          postgresGeoRedundantBackup: ${{ parameters.postgresGeoRedundantBackup }}
+          postgresStorageAutoGrow: ${{ parameters.postgresStorageAutoGrow }}
+          postgresInfrastructureEncryption: ${{ parameters.postgresInfrastructureEncryption }}
+          postgresSslEnforcement: ${{ parameters.postgresSslEnforcement }}
+          postgresVersion: ${{ parameters.postgresVersion }}
+          postgresCapacity: ${{ parameters.postgresCapacity }}
+          postgresSizeMB: ${{ parameters.postgresSizeMB }}
+          postgresBackupRetentionDays: ${{ parameters.postgresBackupRetentionDays }}
+          solrVersion: ${{ parameters.solrVersion }}
+          solrSkuName: ${{ parameters.solrSkuName }}
+          solrCoreName: ${{ parameters.solrCoreName }}
+          ckan_image: "${{ variables.registry }}.azurecr.io/ckan:${{ parameters.ckanImageTagNumber }}"
+          postgresHostName: ${{ variables.postgresHostName }}
+          resourceGroup: ${{ variables.resourceGroup }}
+          azureResourceManagerConnection: ${{ variables.azureResourceManagerConnection }}
+          keyVaultName: ${{ variables.keyVaultName }}
+          virtualNetworkName: ${{ variables.virtualNetworkName }}
+          subnetName: ${{ variables.subnetName }}
+          solrAppName: ${{ variables.solrAppName }}
+          frontendname: ${{ variables.frontendname }}
+          solr_url: ${{ variables.solr_url }}
+          registry: ${{ variables.registry }}
+          appInsightsName: ${{ variables.appInsightsName }}
+          logAnalyticsName: ${{ variables.logAnalyticsName }}
+          diagnosticSettingName: ${{ variables.diagnosticSettingName }}
+          publicStorageAccountName: ${{ variables.publicStorageAccountName }}
+
+  - stage: Production
+    variables:
+      - template: ./templates/variables/prod.yml
+      - name: solr_url
+        value: "https://${{ variables.solrAppName }}.azurewebsites.net/solr/${{ parameters.solrCoreName }}/"
+    jobs:
+      - template: ./templates/jobs/promote-container-job.yml
+        parameters:
+          environment: CKANPROD
+          tag: ${{ parameters.ckanImageTagNumber }}
+          fromACR: ${{ replace(variables.registry, 'srhdp', 'srhdt') }}
+          toACR: ${{ variables.registry }}
+      - template: ./templates/jobs/ckan-alljobs.yml
+        parameters:
+          environment: CKANPROD
           location: ${{ parameters.location }}
           postgresAdministratorLogin: ${{ parameters.postgresAdministratorLogin }}
           postgresCkanLogin: ${{ parameters.postgresCkanLogin }}

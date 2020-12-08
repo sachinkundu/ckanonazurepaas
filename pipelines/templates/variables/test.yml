@@ -2,17 +2,17 @@
 variables:
   # External resource names (created by other pipelines)
   resourceGroup: SRHD-T-EUW-RG01
-  keyVaultName: srhdteuwkv
-  virtualNetworkName: srhdteuwvnet
-  subnetName: default
-  registry: srhdteuwacr
-  appInsightsName: srhdteuwai
-  logAnalyticsName: srhdteuwlog
+  keyVaultName: ${{ lower(replace(replace(variables.resourceGroup, '-RG01', '-KV'), '-', '')) }}
+  virtualNetworkName: ${{ lower(replace(replace(variables.resourceGroup, '-RG01', '-VNET'), '-', '')) }}
+  subnetName: subnet01
+  registry: ${{ lower(replace(replace(variables.resourceGroup, '-RG01', '-ACR'), '-', '')) }}
+  appInsightsName: ${{ lower(replace(replace(variables.resourceGroup, '-RG01', '-AI'), '-', '')) }}
+  logAnalyticsName: ${{ lower(replace(replace(variables.resourceGroup, '-RG01', '-LOG'), '-', '')) }}
   diagnosticSettingName: setByPipeline
   # Target resource names (created by this pipeline)
-  postgresHostName: srhdteuwckandb
-  solrAppName: srhdteuwckansolr
-  frontendname: srhdteuwckan
-  publicStorageAccountName: srhdteuwckanpubstorage
+  postgresHostName: ${{ lower(replace(replace(variables.resourceGroup, '-RG01', '-CKANDB'), '-', '')) }}
+  solrAppName: ${{ lower(replace(replace(variables.resourceGroup, '-RG01', '-CKANSOLR'), '-', '')) }}
+  frontendname: ${{ lower(replace(replace(variables.resourceGroup, '-RG01', '-CKAN'), '-', '')) }}
+  publicStorageAccountName: ${{ lower(replace(replace(variables.resourceGroup, '-RG01', '-CKANPUBSTORAGE'), '-', '')) }}
   # Derived
   azureResourceManagerConnection: SC-${{ variables.resourceGroup }}
