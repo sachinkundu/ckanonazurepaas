@@ -147,11 +147,11 @@ if ($statusCode -eq 200) {
             }
 
             # If successful, save user name and password to Key Vault
-            $keyVaultVaule = az keyvault secret set --name "ckan-$($tuName)-api-user-name" --vault-name $env:KEYVAULT --value $userName --query "name"
-            Write-Information -MessageData "`n$($keyVaultVaule) created in Key Vault" -InformationAction Continue
+            $keyVaultValue = az keyvault secret set --name "ckan-$($tuName)-api-user-name" --vault-name $env:KEYVAULT --value $userName --query "name"
+            Write-Information -MessageData "`n$($keyVaultValue) created in Key Vault" -InformationAction Continue
 
-            $keyVaultVaule = az keyvault secret set --name "ckan-$($tuName)-api-user-password" --vault-name $env:KEYVAULT --value $password --query "name"
-            Write-Information -MessageData "`n$($keyVaultVaule) created in Key Vault" -InformationAction Continue
+            $keyVaultValue = az keyvault secret set --name "ckan-$($tuName)-api-user-password" --vault-name $env:KEYVAULT --value $password --query "name"
+            Write-Information -MessageData "`n$($keyVaultValue) created in Key Vault" -InformationAction Continue
 
         }
         catch {
@@ -212,11 +212,11 @@ if ($statusCode -eq 200) {
                 Write-Information -MessageData "`nNew token created" -InformationAction Continue
 
                 # If successful, save token and token name to Key Vault
-                $keyVaultVaule = az keyvault secret set --name "ckan-$($tuName)-api-user-token-name" --vault-name $env:KEYVAULT --value $tokenName --query "name"
-                Write-Information -MessageData "`n$($keyVaultVaule) created in Key Vault" -InformationAction Continue
+                $keyVaultValue = az keyvault secret set --name "ckan-$($tuName)-api-user-token-name" --vault-name $env:KEYVAULT --value $tokenName --query "name"
+                Write-Information -MessageData "`n$($keyVaultValue) created in Key Vault" -InformationAction Continue
 
-                $keyVaultVaule = az keyvault secret set --name "ckan-$($tuName)-api-user-token" --vault-name $env:KEYVAULT --value $token --query "name"
-                Write-Information -MessageData "`n$($keyVaultVaule) created in Key Vault" -InformationAction Continue
+                $keyVaultValue = az keyvault secret set --name "ckan-$($tuName)-api-user-token" --vault-name $env:KEYVAULT --value $token --query "name"
+                Write-Information -MessageData "`n$($keyVaultValue) created in Key Vault" -InformationAction Continue
             }
             catch {
                 Write-Error "`nCouldn't create API Token!"
