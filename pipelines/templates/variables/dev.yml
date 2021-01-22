@@ -1,18 +1,18 @@
 ---
 variables:
   # External resource names (created by other pipelines)
-  resourceGroup: SRHD-D-EUW-RG01
-  keyVaultName: ${{ lower(replace(replace(variables.resourceGroup, '-RG01', '-KV'), '-', '')) }}
-  virtualNetworkName: ${{ lower(replace(replace(variables.resourceGroup, '-RG01', '-VNET'), '-', '')) }}
-  subnetName: subnet01
-  registry: ${{ lower(replace(replace(variables.resourceGroup, '-RG01', '-ACR'), '-', '')) }}
-  appInsightsName: ${{ lower(replace(replace(variables.resourceGroup, '-RG01', '-AI'), '-', '')) }}
-  logAnalyticsName: ${{ lower(replace(replace(variables.resourceGroup, '-RG01', '-LOG'), '-', '')) }}
-  diagnosticSettingName: setByPipeline
+  resourceGroup: who-sharing
+  keyVaultName: ckankv2
+  virtualNetworkName: ckanvnet
+  registry: ckanacr
+  logAnalyticsName: ckanla
+  diagnosticSettingName: ckands
   # Target resource names (created by this pipeline)
-  postgresHostName: ${{ lower(replace(replace(variables.resourceGroup, '-RG01', '-CKANDB'), '-', '')) }}
-  solrAppName: ${{ lower(replace(replace(variables.resourceGroup, '-RG01', '-CKANSOLR'), '-', '')) }}
-  frontendname: ${{ lower(replace(replace(variables.resourceGroup, '-RG01', '-CKAN'), '-', '')) }}
-  publicStorageAccountName: ${{ lower(replace(replace(variables.resourceGroup, '-RG01', '-CKANPUBSTORAGE'), '-', '')) }}
+  postgresHostName: whockandb
+  solrAppName: ckansolr
+  frontendname: ckan
+  publicStorageAccountName: ckanstorage
   # Derived
-  azureResourceManagerConnection: SC-${{ variables.resourceGroup }}
+  azureResourceManagerConnection: SC-SAKUNDU-RG-WHOSHARING
+
+

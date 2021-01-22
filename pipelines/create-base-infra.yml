@@ -1,0 +1,25 @@
+---
+trigger:
+  - none
+
+parameters:
+  # Resource
+  - name: location
+    type: string
+    default: "westeurope"
+stages:
+  - stage: Development
+    variables:
+      - template: ./templates/variables/dev.yml
+    jobs:
+      - template: ./templates/jobs/ckan-base-infra-job.yml
+        parameters:
+          environment: CKANDEV
+          location: ${{ parameters.location }}
+          resourceGroup: ${{ variables.resourceGroup }}
+          azureResourceManagerConnection: ${{ variables.azureResourceManagerConnection }}
+          keyVaultName: ${{ variables.keyVaultName }}
+          virtualNetworkName: ${{ variables.virtualNetworkName }}
+          registry: ${{ variables.registry }}
+          logAnalyticsName: ${{ variables.logAnalyticsName }}
+          diagnosticSettingName: ${{ variables.diagnosticSettingName }}

@@ -14,3 +14,9 @@ Write-Output "##vso[task.setvariable variable=subscriptionId]$id"
     }
 
 Write-Output "##vso[task.setvariable variable=environment]$environment"
+
+# Get ObjectID of the Service Connection SPN
+
+$servicePrincipalObjectId = (az ad sp list --spn $env:servicePrincipalId | ConvertFrom-Json)[0].objectId
+
+Write-Output "##vso[task.setvariable variable=servicePrincipalObjectId]$servicePrincipalObjectId"
