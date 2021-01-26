@@ -4,14 +4,17 @@ variables:
   resourceGroup: who-sharing
   keyVaultName: ckankv2
   virtualNetworkName: ckanvnet
+  subnetName: default
   registry: ckanacr
   logAnalyticsName: ckanla
+  appInsightsName: ckanai
   diagnosticSettingName: ckands
   # Target resource names (created by this pipeline)
   postgresHostName: whockandb
   solrAppName: ckansolr
-  frontendname: ckan
-  publicStorageAccountName: ckanstorage
+  solr_url: https://ckansolr.azurewebsites.net/solr/
+  frontendname: ckansakundu
+  publicStorageAccountName: ckanpublicstoragasakundu
   # Derived
   azureResourceManagerConnection: SC-SAKUNDU-RG-WHOSHARING
 
