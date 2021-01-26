@@ -122,6 +122,7 @@ jobs:
       dependsOn:
         - ProvisionPostgreSQLForAzure
         - DeploySolrAppService
+        - DeployCKANPublicStorage
       environment: ${{ parameters.environment }}
       location: ${{ parameters.location  }}
       ckan_image: ${{ parameters.ckan_image }}
