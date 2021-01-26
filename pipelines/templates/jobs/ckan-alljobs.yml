@@ -133,3 +133,4 @@ jobs:
       postgres_hostname: ${{ parameters.postgresHostName }}
       registry: ${{ parameters.registry }}
       logAnalyticsName: ${{ parameters.logAnalyticsName }}
+      storageaccountname: ${{ parameters.publicStorageAccountName }}
