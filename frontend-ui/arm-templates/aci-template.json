@@ -43,6 +43,9 @@
         },
         "ckan_sysadmin_email": {
             "type": "string"
+        },
+        "storageaccountname" : {
+            "type": "string"
         }
     },
     "variables": {
@@ -54,14 +57,13 @@
         "dns_label": "[parameters('name')]",
         "ckan_site_id": "[concat('http://', variables('dns_label'), '.westeurope.azurecontainer.io:80/')]",
         "log_analytics_workspace_id": "[resourceId(subscription().subscriptionId, resourceGroup().name, 'Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsName'))]",
-        "storageaccountname": "[concat('srhd', variables('env'), 'euwckanstorage')]",
-        "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageaccountname'))]"
+        "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageaccountname'))]"
     },
     "resources": [
         {
             "type": "Microsoft.Storage/storageAccounts",
             "apiVersion": "2019-06-01",
-            "name": "[variables('storageaccountname')]",
+            "name": "[parameters('storageaccountname')]",
             "location": "[parameters('location')]",
             "kind": "StorageV2",
             "sku": {
@@ -75,25 +77,25 @@
         {
             "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
             "apiVersion": "2019-06-01",
-            "name": "[concat(variables('storageaccountname'), '/default/', 'config')]",
+            "name": "[concat(parameters('storageaccountname'), '/default/', 'config')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageaccountname'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageaccountname'))]"
             ]
         },
         {
             "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
             "apiVersion": "2019-06-01",
-            "name": "[concat(variables('storageaccountname'), '/default/', 'storage')]",
+            "name": "[concat(parameters('storageaccountname'), '/default/', 'storage')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageaccountname'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageaccountname'))]"
             ]
         },
         {
             "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
             "apiVersion": "2019-06-01",
-            "name": "[concat(variables('storageaccountname'), '/default/', 'home')]",
+            "name": "[concat(parameters('storageaccountname'), '/default/', 'home')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageaccountname'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageaccountname'))]"
             ]
         },
         {
@@ -102,7 +104,7 @@
             "name": "[parameters('name')]",
             "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageaccountname'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageaccountname'))]"
             ],
             "tags": {
                 "env": "dev"
@@ -270,7 +272,7 @@
                         "name": "ckanconfig",
                         "azureFile": {
                             "shareName": "config",
-                            "storageAccountName": "[variables('storageaccountname')]",
+                            "storageAccountName": "[parameters('storageaccountname')]",
                             "storageAccountKey": "[listKeys(variables('storageAccountId'), '2019-04-01').keys[0].value]"
                         }
                     },
@@ -278,7 +280,7 @@
                         "name": "ckanhome",
                         "azureFile": {
                             "shareName": "home",
-                            "storageAccountName": "[variables('storageaccountname')]",
+                            "storageAccountName": "[parameters('storageaccountname')]",
                             "storageAccountKey": "[listKeys(variables('storageAccountId'), '2019-04-01').keys[0].value]"
                         }
                     },
@@ -286,7 +288,7 @@
                         "name": "ckanstorage",
                         "azureFile": {
                             "shareName": "storage",
-                            "storageAccountName": "[variables('storageaccountname')]",
+                            "storageAccountName": "[parameters('storageaccountname')]",
                             "storageAccountKey": "[listKeys(variables('storageAccountId'), '2019-04-01').keys[0].value]"
                         }
                     }                                        

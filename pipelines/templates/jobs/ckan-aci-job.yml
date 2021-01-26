@@ -35,6 +35,9 @@ parameters:
   - name: logAnalyticsName
     type: string
 
+  - name: storageaccountname
+    type: string
+
   - name: dependsOn
     type: object
     default: []
@@ -97,4 +100,5 @@ jobs:
                   -ckan_sysadmin_username ${{ variables.ckan_sysadmin_username }}
                   -ckan_sysadmin_password ${{ variables.ckan_sysadmin_password }}
                   -ckan_sysadmin_email ${{ variables.ckan_sysadmin_email }}
+                  -storageaccountname ${{ parameters.storageaccountname }}
                 deploymentMode: "Incremental"
