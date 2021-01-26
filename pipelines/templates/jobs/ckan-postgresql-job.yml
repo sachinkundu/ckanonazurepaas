@@ -80,7 +80,7 @@ jobs:
       - name: ckanLoginPassword
         value: $(POSTGRESPASSWORD)
       - name: administratorLoginPassword
-        value: $(POSTGRESADMINPASSWORD)
+        value: $(POSTGRESADMINPASSWORD)    
     strategy:
       runOnce:
         deploy:
