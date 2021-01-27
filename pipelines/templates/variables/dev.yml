@@ -17,7 +17,7 @@ variables:
   #Could change these
   keyVaultName: ckankv
   virtualNetworkName: ckanvnet
-  subnetName: default
+  subnetNames: default
   diagnosticSettingName: ckands
   appInsightsName: ckanai
 

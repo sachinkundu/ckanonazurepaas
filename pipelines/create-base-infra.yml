@@ -14,7 +14,7 @@ stages:
           azureResourceManagerConnection: ${{ variables.azureResourceManagerConnection }}
           keyVaultName: ${{ variables.keyVaultName }}
           virtualNetworkName: ${{ variables.virtualNetworkName }}
-          subnetName: ${{ variables.subnetName }}
+          subnetNames: ${{ variables.subnetNames }}
           registry: ${{ variables.registry }}
           logAnalyticsName: ${{ variables.logAnalyticsName }}
           diagnosticSettingName: ${{ variables.diagnosticSettingName }}

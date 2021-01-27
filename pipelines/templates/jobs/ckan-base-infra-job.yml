@@ -10,7 +10,7 @@ parameters:
     type: string
   - name: virtualNetworkName
     type: string
-  - name: subnetName
+  - name: subnetNames
     type: string
   - name: registry
     type: string
@@ -67,7 +67,7 @@ jobs:
                 -virtualNetworkName ${{ parameters.virtualNetworkName }}
                 -logAnalyticsName ${{ parameters.logAnalyticsName }}
                 -diagnosticSettingName ${{ parameters.diagnosticSettingName }}
-                -subnetName ${{ parameters.subnetName }}
+                -subnetNames ${{ parameters.subnetNames }}
               deploymentMode: "Incremental"
           - task: AzureResourceManagerTemplateDeployment@3
             displayName: "Create ACR"
