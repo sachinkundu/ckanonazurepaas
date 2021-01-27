@@ -12,7 +12,7 @@ parameters:
     type: string
 
   - name: skuName
-    default: B1
+    default: B2
     type: string
 
   - name: solrAppName

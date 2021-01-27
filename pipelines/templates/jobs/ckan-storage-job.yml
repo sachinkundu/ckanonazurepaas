@@ -63,16 +63,3 @@ jobs:
                   -storageAccountName ${{ parameters.publicStorageAccountName }}
                   -location ${{ parameters.location }}
                 deploymentMode: "Incremental"
-
-            - task: AzureCLI@2
-              displayName: Set permissions for DDI ADF user in public storage
-              inputs:
-                azureSubscription: ${{ parameters.azureResourceManagerConnection }}
-                scriptType: 'pscore'
-                scriptLocation: 'scriptPath'
-                scriptPath: './scripts/environment/Set-PublicStorageAccess.ps1'
-              env:
-                STORAGEACCOUNTNAME: ${{ parameters.publicStorageAccountName }}
-                FACTORYNAME: ${{ lower(replace(replace(parameters.resourceGroup, '-RG01', '-DDI'), '-', '')) }}df
-                TECHNICALUNIT: DDI
-                RESOURCEGROUP: "${{ parameters.resourceGroup }}"
