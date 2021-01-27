@@ -1,11 +1,13 @@
 ---
 variables:
   # Must change
-  azureResourceManagerConnection: SC-SAKUNDU-RG-WHOSHARING
-  frontendname: ckansakundu
-  publicStorageAccountName: ckanpublicstoragasakundu
-  registry: ckanacr
-  postgresHostName: ckandb
+  azureResourceManagerConnection: SC-SAKUNDU-RG-CKANRG
+  frontendname: frontendinckanrg
+  publicStorageAccountName: publicstorageinckanrg
+  registry: acrinckanrg
+  postgresHostName: postgresinckanrg
+  solrAppName: solrinckanrg
+  solr_url: https://solrinckanrg.azurewebsites.net/solr/
   
   #Should change these
   resourceGroup: ckanrg
@@ -19,5 +21,3 @@ variables:
   diagnosticSettingName: ckands
   appInsightsName: ckanai
   
-  solrAppName: ckansolr
-  solr_url: https://ckansolr.azurewebsites.net/solr/
