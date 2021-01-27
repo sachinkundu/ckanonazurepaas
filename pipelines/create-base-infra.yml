@@ -18,3 +18,4 @@ stages:
           registry: ${{ variables.registry }}
           logAnalyticsName: ${{ variables.logAnalyticsName }}
           diagnosticSettingName: ${{ variables.diagnosticSettingName }}
+          appInsightsName: ${{ variables.appInsightsName }}

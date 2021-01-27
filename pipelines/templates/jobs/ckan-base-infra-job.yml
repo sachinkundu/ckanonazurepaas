@@ -18,10 +18,12 @@ parameters:
     type: string
   - name: diagnosticSettingName
     type: string
+  - name: appInsightsName
+    type: string
 
 jobs:
 - deployment: ProvisionBaseInfra
-  environment: ${{ parameters.environment }}
+  environment: CKANDEV
   strategy:
     runOnce:
       deploy:
