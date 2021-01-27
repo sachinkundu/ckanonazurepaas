@@ -1,7 +1,5 @@
 ---
 parameters:
-  - name: environment
-    type: string
   - name: location
     type: string
   - name: resourceGroup
@@ -12,16 +10,20 @@ parameters:
     type: string
   - name: virtualNetworkName
     type: string
+  - name: subnetNames
+    type: string
   - name: registry
     type: string
   - name: logAnalyticsName
     type: string
   - name: diagnosticSettingName
     type: string
+  - name: appInsightsName
+    type: string
 
 jobs:
 - deployment: ProvisionBaseInfra
-  environment: ${{ parameters.environment }}
+  environment: CKANDEV
   strategy:
     runOnce:
       deploy:
@@ -35,7 +37,6 @@ jobs:
               scriptPath: './scripts/environment/New-EnvironmentVariables.ps1'
               addSpnToEnvironment: true
             displayName: Set Azure Subscription ID to task variables    
-          - script: echo $(servicePrincipalObjectId)
           - task: AzureResourceManagerTemplateDeployment@3
             displayName: "Create Log Analytics"
             inputs:
@@ -47,6 +48,9 @@ jobs:
               templateLocation: "Linked artifact"
               csmFile: "./arm-templates/log_analytics.json"
               csmParametersFile: "./arm-templates/log_analytics.parameters.json"
+              overrideParameters: >
+                -logAnalyticsName ${{ parameters.logAnalyticsName }}
+                -diagnosticSettingName ${{ parameters.diagnosticSettingName }}
               deploymentMode: "Incremental"
           - task: AzureResourceManagerTemplateDeployment@3
             displayName: "Create VNET"
@@ -59,6 +63,11 @@ jobs:
               templateLocation: "Linked artifact"
               csmFile: "./arm-templates/vnet.json"
               csmParametersFile: "./arm-templates/vnet.parameters.json"
+              overrideParameters: >
+                -virtualNetworkName ${{ parameters.virtualNetworkName }}
+                -logAnalyticsName ${{ parameters.logAnalyticsName }}
+                -diagnosticSettingName ${{ parameters.diagnosticSettingName }}
+                -subnetNames ${{ parameters.subnetNames }}
               deploymentMode: "Incremental"
           - task: AzureResourceManagerTemplateDeployment@3
             displayName: "Create ACR"
@@ -70,7 +79,10 @@ jobs:
               location: ${{ parameters.location }}
               templateLocation: "Linked artifact"
               csmFile: "./arm-templates/acr.json"
-              csmParametersFile: "./arm-templates/acr.parameters.json"
+              overrideParameters: >
+                -containerRegistryName ${{ parameters.registry }}
+                -logAnalyticsName ${{ parameters.logAnalyticsName }}
+                -diagnosticSettingName ${{ parameters.diagnosticSettingName }}
               deploymentMode: "Incremental"
           - task: AzureResourceManagerTemplateDeployment@3
             displayName: "Create KV"
@@ -88,4 +100,22 @@ jobs:
                 -keyVaultName ${{ parameters.keyVaultName }}
                 -servicePrincipalId $servicePrincipalId
                 -servicePrincipalObjectId $(servicePrincipalObjectId)
+                -logAnalyticsName ${{ parameters.logAnalyticsName }}
+                -diagnosticSettingName ${{ parameters.diagnosticSettingName }}
+              deploymentMode: "Incremental"
+          - task: AzureResourceManagerTemplateDeployment@3
+            displayName: "Create App Insights"
+            inputs:
+              addSpnToEnvironment: true
+              deploymentScope: "Resource Group"
+              azureResourceManagerConnection: ${{ parameters.azureResourceManagerConnection }}
+              action: "Create Or Update Resource Group"
+              resourceGroupName: ${{ parameters.resourceGroup }}
+              location: ${{ parameters.location }}
+              templateLocation: "Linked artifact"
+              csmFile: "./arm-templates/appinsights.json"
+              csmParametersFile: "./arm-templates/appinsights.parameters.json"
+              overrideParameters: >
+                -name ${{ parameters.appInsightsName }}
+                -logAnalyticsName ${{ parameters.logAnalyticsName }}
               deploymentMode: "Incremental"              
