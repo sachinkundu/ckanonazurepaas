@@ -1,21 +1,23 @@
 ---
 variables:
-  # External resource names (created by other pipelines)
-  resourceGroup: who-sharing
-  keyVaultName: ckankv2
-  virtualNetworkName: ckanvnet
-  subnetName: default
-  registry: ckanacr
-  logAnalyticsName: ckanla
-  appInsightsName: ckanai
-  diagnosticSettingName: ckands
-  # Target resource names (created by this pipeline)
-  postgresHostName: whockandb
-  solrAppName: ckansolr
-  solr_url: https://ckansolr.azurewebsites.net/solr/
+  # Must change
+  azureResourceManagerConnection: SC-SAKUNDU-RG-WHOSHARING
   frontendname: ckansakundu
   publicStorageAccountName: ckanpublicstoragasakundu
-  # Derived
-  azureResourceManagerConnection: SC-SAKUNDU-RG-WHOSHARING
+  registry: ckanacr
+  postgresHostName: ckandb
+  
+  #Should change these
+  resourceGroup: ckanrg
+  location: westeurope
 
-
+  #Could change these
+  keyVaultName: ckankv
+  virtualNetworkName: ckanvnet
+  subnetName: default
+  logAnalyticsName: ckanla
+  diagnosticSettingName: ckands
+  appInsightsName: ckanai
+  
+  solrAppName: ckansolr
+  solr_url: https://ckansolr.azurewebsites.net/solr/
