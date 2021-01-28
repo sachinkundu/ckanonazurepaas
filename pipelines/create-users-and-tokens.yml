@@ -6,27 +6,18 @@ parameters:
   - name: azureResourceManagerConnection
     displayName: "Set the deployment environment"
     type: string
-    default: SRHD-D-EUW-RG01
-    values:
-      - SRHD-D-EUW-RG01
-      - SRHD-S-EUW-RG01
-      - SRHD-T-EUW-RG01
-      - SRHD-P-EUW-RG01
 
   - name: ckanURL
     displayName: "Enter the URL for the CKAN instance"
     type: string
-    default: http://srhddeuwckan.westeurope.azurecontainer.io
 
-  - name: technicalUnit
-    displayName: "Enter technical unit name (can add multiple names with comma separation)"
+  - name: names
+    displayName: "Enter names (can add multiple names with comma separation)"
     type: string
-    default: NTD
 
-  - name: technicalUnitEmails
-    displayName: "Enter technical unit emails (must match the number of TU names)"
+  - name: emails
+    displayName: "Enter emails (must match the number of names)"
     type: string
-    default: example@example.com
 
   - name: apiToken
     displayName: "API Token name in Key Vault"
@@ -34,10 +25,7 @@ parameters:
     default: CKANSYSADMINAPITOKEN
 
 variables:
-  - name: location
-    value: 'westeurope'
-  - name: keyVaultName
-    value: ${{ lower(replace(replace(parameters.azureResourceManagerConnection, '-RG01', '-KV'), '-', '')) }}
+  - template: ./templates/variables/dev.yml
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -67,7 +55,7 @@ steps:
     env:
       KEYVAULT: $(keyVaultName)
       CKANURL: ${{ parameters.ckanURL }}
-      TECHUNITNAMES: ${{ parameters.technicalUnit }}
-      TECHUNITEMAILS: ${{ parameters.technicalUnitEmails }}
+      NAMES: ${{ parameters.names }}
+      EMAILS: ${{ parameters.emails }}
       APITOKENNAME: ${{ parameters.apiToken }}
     displayName: Create and permission Tech Unit CKAN users and set API tokens
