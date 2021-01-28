@@ -9,6 +9,7 @@ variables:
   solrAppName: solrinckanrg
   solr_url: https://solrinckanrg.azurewebsites.net/solr/
   logAnalyticsName: lainckanrg
+  ckanImageTagNumber: 508
   
   #Should change these
   resourceGroup: ckanrg
@@ -20,4 +21,24 @@ variables:
   subnetNames: default
   diagnosticSettingName: ckands
   appInsightsName: ckanai
+  postgresAdministratorLogin: ckanpostgresadmin
+  postgresCkanLogin: ckan_default
+  postgresCkanDatabaseName: ckan_default
+  postgresSkuTier: GeneralPurpose
+  postgresSkuFamily: Gen5
+  postgresSkuName: GP_Gen5_4
+  postgresGeoRedundantBackup: Disabled
+  postgresStorageAutoGrow: Enabled
+  postgresInfrastructureEncryption: Disabled
+  postgresSslEnforcement: Enabled
+  postgresVersion: 11
+  postgresCapacity: 4
+  postgresSizeMB: 5120
+  postgresBackupRetentionDays: 7
+  
+  # SOLR
+  solrCoreName: ckan
+  solrSkuName: B2
+  solrVersion: 6.5.1
+  solrPasswordKeyName: SOLRPASSWORD
 

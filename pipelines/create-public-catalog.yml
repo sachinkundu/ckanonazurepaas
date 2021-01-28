@@ -2,115 +2,41 @@
 trigger:
   - none
 
-parameters:
-  # Resource
-  - name: location
-    type: string
-    default: "westeurope"
-  # Postgres
-  - name: postgresAdministratorLogin
-    type: string
-    default: "ckanpostgresadmin"
-  - name: postgresCkanLogin
-    type: string
-    default: "ckan_default"
-  - name: postgresCkanDatabaseName
-    type: string
-    default: "ckan_default"
-  - name: postgresSkuTier
-    type: string
-    default: "GeneralPurpose"
-  - name: postgresSkuFamily
-    type: string
-    default: "Gen5"
-  - name: postgresSkuName
-    type: string
-    default: "GP_Gen5_4"
-  - name: postgresGeoRedundantBackup
-    type: string
-    default: "Disabled"
-  - name: postgresStorageAutoGrow
-    type: string
-    default: "Enabled"
-  - name: postgresInfrastructureEncryption
-    type: string
-    default: "Disabled"
-  - name: postgresSslEnforcement
-    type: string
-    default: "Enabled"
-  - name: postgresVersion
-    type: string
-    default: "11"
-  - name: postgresCapacity
-    displayName: "vCores allocated for PostgreSQL server"
-    type: number
-    default: 4
-  - name: postgresSizeMB
-    displayName: "Starting storage allocated for database"
-    type: number
-    default: 5120
-  - name: postgresBackupRetentionDays
-    displayName: "Backup retention days"
-    type: number
-    default: 7
-  # SOLR
-  - name: solrCoreName
-    displayName: "SOLR core name"
-    type: string
-    default: "ckan"
-  - name: solrSkuName
-    displayName: "SOLR App Service Plan SKU Size"
-    type: string
-    default: "B2"
-  - name: solrVersion
-    displayName: "SOLR version"
-    type: string
-    default: "6.5.1"
-  - name: solrPasswordKeyName
-    displayName: "SOLR Password key name in KeyVault"
-    type: string
-    default: "SOLRPASSWORD"
-  # CKAN
-  - name: ckanImageTagNumber
-    displayName: "CKAN prebuilt docker image tag"
-    type: string
-    default: 5055
-
 stages:
   - stage: Development
     variables:
       - template: ./templates/variables/dev.yml
       - name: solr_url
-        value: "https://${{ variables.solrAppName }}.azurewebsites.net/solr/${{ parameters.solrCoreName }}/"
+        value: "https://${{ variables.solrAppName }}.azurewebsites.net/solr/${{ variables.solrCoreName }}/"
     jobs:
       - template: ./templates/jobs/ckan-alljobs.yml
         parameters:
           environment: CKANDEV
-          location: ${{ parameters.location }}
-          postgresAdministratorLogin: ${{ parameters.postgresAdministratorLogin }}
-          postgresCkanLogin: ${{ parameters.postgresCkanLogin }}
-          postgresCkanDatabaseName: ${{ parameters.postgresCkanDatabaseName }}
-          postgresSkuTier: ${{ parameters.postgresSkuTier }}
-          postgresSkuFamily: ${{ parameters.postgresSkuFamily }}
-          postgresSkuName: ${{ parameters.postgresSkuName }}
-          postgresGeoRedundantBackup: ${{ parameters.postgresGeoRedundantBackup }}
-          postgresStorageAutoGrow: ${{ parameters.postgresStorageAutoGrow }}
-          postgresInfrastructureEncryption: ${{ parameters.postgresInfrastructureEncryption }}
-          postgresSslEnforcement: ${{ parameters.postgresSslEnforcement }}
-          postgresVersion: ${{ parameters.postgresVersion }}
-          postgresCapacity: ${{ parameters.postgresCapacity }}
-          postgresSizeMB: ${{ parameters.postgresSizeMB }}
-          postgresBackupRetentionDays: ${{ parameters.postgresBackupRetentionDays }}
-          solrVersion: ${{ parameters.solrVersion }}
-          solrSkuName: ${{ parameters.solrSkuName }}
-          solrCoreName: ${{ parameters.solrCoreName }}
-          ckan_image: "${{ variables.registry }}.azurecr.io/ckan:${{ parameters.ckanImageTagNumber }}"
+          location: ${{ variables.location }}
+          postgresAdministratorLogin: ${{ variables.postgresAdministratorLogin }}
+          postgresCkanLogin: ${{ variables.postgresCkanLogin }}
+          postgresCkanDatabaseName: ${{ variables.postgresCkanDatabaseName }}
+          postgresSkuTier: ${{ variables.postgresSkuTier }}
+          postgresSkuFamily: ${{ variables.postgresSkuFamily }}
+          postgresSkuName: ${{ variables.postgresSkuName }}
+          postgresGeoRedundantBackup: ${{ variables.postgresGeoRedundantBackup }}
+          postgresStorageAutoGrow: ${{ variables.postgresStorageAutoGrow }}
+          postgresInfrastructureEncryption: ${{ variables.postgresInfrastructureEncryption }}
+          postgresSslEnforcement: ${{ variables.postgresSslEnforcement }}
+          postgresVersion: ${{ variables.postgresVersion }}
+          postgresCapacity: ${{ variables.postgresCapacity }}
+          postgresSizeMB: ${{ variables.postgresSizeMB }}
+          postgresBackupRetentionDays: ${{ variables.postgresBackupRetentionDays }}
+          solrVersion: ${{ variables.solrVersion }}
+          solrSkuName: ${{ variables.solrSkuName }}
+          solrCoreName: ${{ variables.solrCoreName }}
+          ckan_image: "${{ variables.registry }}.azurecr.io/ckan:${{ variables.ckanImageTagNumber }}"
           postgresHostName: ${{ variables.postgresHostName }}
           resourceGroup: ${{ variables.resourceGroup }}
           azureResourceManagerConnection: ${{ variables.azureResourceManagerConnection }}
           keyVaultName: ${{ variables.keyVaultName }}
           virtualNetworkName: ${{ variables.virtualNetworkName }}
-          subnetName: ${{ variables.subnetName }}
+          subnetName: ${{ variables.subnetNames }}
           solrAppName: ${{ variables.solrAppName }}
           frontendname: ${{ variables.frontendname }}
           solr_url: ${{ variables.solr_url }}
