@@ -3,8 +3,8 @@ $apiToken = (az keyvault secret show --name $env:APITOKENNAME --vault-name $env:
 $ckanURL = "$($env:CKANURL)/api/3/action/"
 
 # Create lists for user names, and emails, and check if their lengths matches
-$userNames = $env:TECHUNITNAMES.Split(",")
-$emails = $env:TECHUNITEMAILS.Split(",")
+$userNames = $env:NAMES.Split(",")
+$emails = $env:EMAILS.Split(",")
 
 if ($userNames.Count -ne $emails.Count) {
     Write-Error "`nThe user name and email counts are not matching!" -ErrorAction Stop
