@@ -38,9 +38,11 @@ Use documentation provided at [https://docs.microsoft.com/en-us/azure/devops/pip
 
 Use the pipeline [frontend-ui/pipelines/build-and-push-container.yaml](frontend-ui/pipelines/build-and-push-container.yaml) to create a new pipeline to generate a custom ckan image which is pushed to ACR created above. The ACR service connection created above is used as a parameter for this pipeline.
 
-Note the version tag generated in the build and push logs during pipeline run or you can go to the ACR/Repositories/ckan and get the version tag from there.
+Note the version tag generated in the build and push logs during pipeline run or you can go to the ACR/Repositories/ckan and get the version tag from there. Update [pipelines/templates/variables/dev.yml](pipelines/templates/variables/dev.yml) with the version tag for the key ``ckanImageTagNumber`` and push the changes to your repo.
 
 Create the following secrets in Key Vault in the CKAN resource group
+
+> **NOTE** Make sure CKANSYSADMINUSERNAME is all lowercase.
 
 * POSTGRESPASSWORD
 * POSTGRESADMINPASSWORD

@@ -9,6 +9,7 @@ variables:
   solrAppName: solrinckanrg
   solr_url: https://solrinckanrg.azurewebsites.net/solr/
   logAnalyticsName: lainckanrg
+  keyVaultName: ckankv
   ckanImageTagNumber: 508
   
   #Should change these
@@ -16,7 +17,6 @@ variables:
   location: westeurope
 
   #Could change these
-  keyVaultName: ckankv
   virtualNetworkName: ckanvnet
   subnetNames: default
   diagnosticSettingName: ckands
