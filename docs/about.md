@@ -2,11 +2,11 @@
 
 Comprehensive Knowledge Archive Network (CKAN) is an open-source open data portal for the storage and distribution of open data. It is the defacto data portal used by governments, non governmental organizations and companies to make data available to general public.
 
-We recently worked with World Health Organization(WHO) on their data platform. This platform makes it easy to share and consume data within different teams in WHO as well as make it possible to release high quality datasets to the general public through CKAN.
+We recently worked with an international organization in healthcare on their data platform. This platform makes it easy to share and consume data within different teams in the organization as well as make it possible to release high quality datasets to the general public through CKAN.
 
 ## Motivation
 
-While there are already [packaged solutions](https://azuremarketplace.microsoft.com/en-us/marketplace/apps/bitnami.ckan-multitier?tab=Overview) to deploy CKAN on Azure using Azure infrastructure services, we wanted to leverage Azure'd Platform as a Service offering as much as possible. This was done to reduce the maintenance burden for WHO IT as well as to utilize Azure to its fullest. 
+While there are already [packaged solutions](https://azuremarketplace.microsoft.com/en-us/marketplace/apps/bitnami.ckan-multitier?tab=Overview) to deploy CKAN on Azure using Azure infrastructure services, we wanted to leverage Azure's Platform as a Service offering as much as possible. This was done to reduce the maintenance burden for IT as well as to utilize Azure to its fullest. 
 
 ## Architecture
 
